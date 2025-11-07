@@ -113,14 +113,23 @@ const legendBins = computed(() => {
 
 /** filtering */
 const currentRange = ref(null) // [min,max] or null
+
 const layerFilter = computed(() => {
-    if (!currentRange.value) return null
-    const field = active.value.valueField
-    let [min, max] = currentRange.value
-    const expr = ['all']
-    if (Number.isFinite(+min)) expr.push(['>=', ['get', field], +min])
-    if (Number.isFinite(+max)) expr.push(['<', ['get', field], +max])
-    return expr.length > 1 ? expr : null
+    const r = currentRange.value
+    if (!r) return true
+
+    // last bin: ['last', min]
+    if (r[0] === 'last') {
+        return ['>=', ['get', active.value.valueField], r[1]]
+    }
+
+    const [min, max, exclusiveUpper] = r
+    return ['all',
+        ['>=', ['get', active.value.valueField], min],
+        exclusiveUpper
+            ? ['<', ['get', active.value.valueField], max]  // upper-exclusive
+            : ['<=', ['get', active.value.valueField], max] // upper-inclusive for the first bin
+    ]
 })
 
 function onFactorChange(id) { selectedFactor.value = id; currentRange.value = null }

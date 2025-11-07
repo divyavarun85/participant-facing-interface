@@ -138,13 +138,29 @@ function updateMax(v) { const n = Number(v); if (Number.isFinite(n)) { max.value
 function onLegendClick(i) {
   const text = String(props.legendBins[i]?.range || '')
   const nums = text.match(/[+-]?\d+(\.\d+)?/g)?.map(Number) || []
-  let lo = domain.value.min, hi = domain.value.max
-  if (/≤/.test(text) && nums.length === 1) { lo = -Infinity; hi = nums[0] }
-  else if (/>/.test(text) && nums.length === 1) { lo = nums[0]; hi = Infinity }
-  else if (nums.length === 2) { lo = nums[0]; hi = nums[1] }
-  emit('legend-bin-click', { index: i, range: [lo, hi] })
-  emit('range-change', [Number.isFinite(lo) ? lo : domain.value.min, Number.isFinite(hi) ? hi : domain.value.max])
+
+  // First bin: "≤ b0"  -> inclusive upper
+  if (/≤/.test(text) && nums.length === 1) {
+    emit('range-change', [Number.NEGATIVE_INFINITY, nums[0]]) // parent will use <=
+    return
+  }
+
+  // Last bin: "> bN"    -> only lower bound
+  if (/>/.test(text) && nums.length === 1) {
+    emit('range-change', ['last', nums[0]])
+    return
+  }
+
+  // Middle bin: "a–b"   -> [a, b) (upper-exclusive to match step())
+  if (nums.length === 2) {
+    emit('range-change', [nums[0], nums[1], 'exclusive'])
+    return
+  }
+
+  // Fallback: clear
+  emit('range-change', null)
 }
+
 
 function intersectsSelected(i) {
   if (!props.selectedRange) return false
