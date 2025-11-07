@@ -289,13 +289,6 @@ function fmt(n) { return (typeof n === 'number' && isFinite(n)) ? (Math.abs(n) %
   font-size: 12px
 }
 
-.legend-active-dot {
-  margin-left: auto;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #3864ff
-}
 
 .legend-nodata {
   cursor: default
