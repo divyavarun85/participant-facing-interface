@@ -1,8 +1,8 @@
 <template>
     <div class="environmental-map-container">
         <MapControls :factors="factors" :selected-factor="selectedFactor" :legend-bins="legendBins"
-            :palette="active.colors" @factor-change="onFactorChange" @range-change="onRangeChange"
-            @toggle-overlay="overlayOn = $event" />
+            :palette="active.colors" :selected-range="currentRange" @factor-change="onFactorChange"
+            @range-change="onRangeChange" @toggle-overlay="overlayOn = $event" />
         <div class="map-wrapper">
 
             <MapHexLayer v-if="dataObj" :data="dataObj" :style="style" :valueField="active.valueField"
