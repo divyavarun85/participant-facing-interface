@@ -8,7 +8,7 @@
             <MapHexLayer v-if="dataObj" :data="dataObj" :style="style" :mapStyle="mapStyle"
                 :valueField="active.valueField" :breaks="active.breaks" :colors="active.colors" :center="center"
                 :zoom="zoom" :filter="layerFilter" :hoverHighlight="true" :zoomOnClick="true" :zoomOnClickTarget="8"
-                :tooltipFields="tooltipFields" />
+                :statesUrl="statesGeoUrl" :showStateBorders="true" :tooltipFields="tooltipFields" />
 
         </div>
     </div>
@@ -152,6 +152,8 @@ const layerFilter = computed(() => {
 
 function onFactorChange(id) { selectedFactor.value = id; currentRange.value = null }
 function onRangeChange(range) { currentRange.value = range }
+
+const statesGeoUrl = 'https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json'
 
 let overlayOn = ref(false) // kept if you add an overlay toggle
 
