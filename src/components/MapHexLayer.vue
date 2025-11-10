@@ -281,6 +281,42 @@ onMounted(() => {
 
     applyFilter()
     registerInteraction()
+
+    const boldLayers = ['State labels']
+    const placeLayers = ['City labels', 'Capital city labels']
+
+    boldLayers.forEach(layerId => {
+      if (!map.getLayer(layerId)) return
+      try {
+        map.setLayoutProperty(layerId, 'text-transform', 'uppercase')
+        map.setLayoutProperty(layerId, 'text-letter-spacing', 0.25)
+        map.setLayoutProperty(layerId, 'text-font', ['Open Sans Bold'])
+        map.setLayoutProperty(layerId, 'text-size', [
+          'interpolate', ['linear'], ['zoom'],
+          4, 9,
+          6, 12,
+          8, 16
+        ])
+        map.setPaintProperty(layerId, 'text-halo-color', '#ffffff')
+        map.setPaintProperty(layerId, 'text-halo-width', 2.5)
+        map.setPaintProperty(layerId, 'text-halo-blur', 0.5)
+        map.setPaintProperty(layerId, 'text-color', '#1a1a1a')
+      } catch (err) {
+        console.warn(`Unable to adjust styling for ${layerId}`, err)
+      }
+    })
+
+    placeLayers.forEach(layerId => {
+      if (!map.getLayer(layerId)) return
+      try {
+        map.setPaintProperty(layerId, 'text-halo-color', '#ffffff')
+        map.setPaintProperty(layerId, 'text-halo-width', 2)
+        map.setPaintProperty(layerId, 'text-color', '#111111')
+      } catch (err) {
+        console.warn(`Unable to adjust styling for ${layerId}`, err)
+      }
+    })
+
     setTimeout(() => map.resize(), 0)
   })
 })
