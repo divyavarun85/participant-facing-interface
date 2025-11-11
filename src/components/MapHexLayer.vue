@@ -23,6 +23,9 @@ const props = defineProps({
   tooltipFields: { type: Array, default: () => [] },
   tooltipFormatter: { type: Function, default: null },
   popupOptions: { type: Object, default: () => ({}) },
+  selectedHexIds: { type: Array, default: () => [] },
+  selectedHexColor: { type: String, default: '#111827' },
+  selectedHexWidth: { type: Number, default: 3 },
 
   statesUrl: { type: [String, Object], default: null },
   showStateBorders: { type: Boolean, default: false },
@@ -37,11 +40,36 @@ let popup
 let hoveredId = null
 let lastClickCameFromLayer = false
 let canvasMouseLeaveHandlerRegistered = false
+const selectionLayerId = `${props.layerId}-selection`
 
 const defaultPopupOptions = {
   closeButton: false,
   closeOnClick: false,
   offset: 12
+}
+
+const normalizeIds = (ids = []) => {
+  if (!Array.isArray(ids)) return []
+  return ids
+    .map(value => {
+      const num = Number(value)
+      if (Number.isFinite(num)) return num
+      const str = String(value ?? '').trim()
+      return str ? str : null
+    })
+    .filter(value => value !== null)
+}
+
+const selectionFilter = ids => {
+  const normalized = normalizeIds(ids)
+  if (!normalized.length) {
+    return ['==', ['get', 'hex_id'], '___none']
+  }
+  return ['match', ['coalesce', ['get', 'hex_id'], ['get', 'hex_id_str'], ['to-string', ['get', 'hex_id']]],
+    ['literal', normalized.map(val => (typeof val === 'number' ? val : String(val)))],
+    true,
+    false
+  ]
 }
 
 const colorExpr = (field, breaks, colors) => {
@@ -188,6 +216,16 @@ function handleCanvasMouseLeave() {
   closePopup()
 }
 
+function updateSelectionLayer() {
+  if (!map || !map.isStyleLoaded()) return
+  if (!map.getLayer(selectionLayerId)) return
+  map.setFilter(selectionLayerId, selectionFilter(props.selectedHexIds))
+  map.setPaintProperty(selectionLayerId, 'line-color', props.selectedHexColor)
+  map.setPaintProperty(selectionLayerId, 'line-width',
+    Number.isFinite(props.selectedHexWidth) ? props.selectedHexWidth : 3
+  )
+}
+
 function registerInteraction() {
   if (!map) return
   map.on('mouseenter', props.layerId, handleCursorEnter)
@@ -300,6 +338,21 @@ onMounted(() => {
       }
     }
 
+    map.addLayer({
+      id: selectionLayerId,
+      type: 'line',
+      source: props.sourceId,
+      filter: selectionFilter(props.selectedHexIds),
+      paint: {
+        'line-color': props.selectedHexColor,
+        'line-width': props.selectedHexWidth,
+        'line-opacity': 0.95
+      },
+      layout: { 'line-join': 'round', 'line-cap': 'round' }
+    }, beforeId)
+
+    updateSelectionLayer()
+
     applyFilter()
     registerInteraction()
     if (!canvasMouseLeaveHandlerRegistered && mapEl.value) {
@@ -352,6 +405,27 @@ watch(
 )
 
 watch(
+  () => props.selectedHexIds.slice(),
+  () => updateSelectionLayer()
+)
+
+watch(
+  () => props.selectedHexColor,
+  color => {
+    if (!map || !map.getLayer(selectionLayerId) || !color) return
+    map.setPaintProperty(selectionLayerId, 'line-color', color)
+  }
+)
+
+watch(
+  () => props.selectedHexWidth,
+  width => {
+    if (!map || !map.getLayer(selectionLayerId) || !Number.isFinite(width)) return
+    map.setPaintProperty(selectionLayerId, 'line-width', width)
+  }
+)
+
+watch(
   () => props.hoverHighlight,
   () => {
     if (!map || !map.isStyleLoaded()) return
@@ -372,6 +446,43 @@ watch(
 )
 
 watch(
+  () => {
+    const center = Array.isArray(props.center) ? props.center : []
+    const [lng, lat] = center
+    return [Number(lng), Number(lat), Number(props.zoom)]
+  },
+  ([lng, lat, zoom]) => {
+    if (!map || !map.isStyleLoaded()) return
+
+    const hasCenter = Number.isFinite(lng) && Number.isFinite(lat)
+    const hasZoom = Number.isFinite(zoom)
+
+    if (!hasCenter && !hasZoom) return
+
+    const params = { duration: 600 }
+
+    if (hasCenter) {
+      const current = map.getCenter()
+      if (Math.abs(current.lng - lng) > 1e-6 || Math.abs(current.lat - lat) > 1e-6) {
+        params.center = [lng, lat]
+      }
+    }
+
+    if (hasZoom) {
+      const currentZoom = map.getZoom()
+      if (Math.abs(currentZoom - zoom) > 1e-3) {
+        params.zoom = zoom
+      }
+    }
+
+    if (params.center || params.zoom) {
+      map.easeTo(params)
+    }
+  },
+  { deep: true }
+)
+
+watch(
   () => props.data,
   newData => {
     if (!map || !map.isStyleLoaded()) return
@@ -386,6 +497,7 @@ watch(
       } else {
         source.setData(newData)
       }
+      updateSelectionLayer()
     }
   }
 )

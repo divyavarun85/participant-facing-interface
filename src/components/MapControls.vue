@@ -66,6 +66,23 @@
       Show no-data overlay
     </label>
 
+    <!-- Pin lookup -->
+    <div class="pin-lookup">
+      <label for="pin-input">Find a ZIP / Postal Code</label>
+      <div class="pin-input-row">
+        <input id="pin-input" v-model="pinQuery" type="text" placeholder="e.g. 37209" inputmode="numeric"
+          @keyup.enter="submitPin" />
+        <button class="btn-primary" @click="submitPin" :disabled="pinLoading || !pinQuery.trim()">
+          <span v-if="pinLoading" class="spinner" aria-hidden="true"></span>
+          <span>{{ pinLoading ? 'Searching…' : 'Go' }}</span>
+        </button>
+      </div>
+      <p class="pin-hint">Enter a ZIP code to jump and highlight the corresponding hex.</p>
+      <transition name="fade">
+        <p v-if="pinErrorToDisplay" class="pin-error">{{ pinErrorToDisplay }}</p>
+      </transition>
+    </div>
+
     <!-- Numeric range controls -->
     <div class="legend" style="margin-top:12px">
       <label class="range-label">Filter range</label>
@@ -100,11 +117,16 @@ const props = defineProps({
   unit: { type: String, default: '' },
   overlay: { type: Boolean, default: false },
   noDataColor: { type: String, default: '#b8b8b8' },
-  selectedRange: { type: [Array, null], default: null } // [min,max] or null
+  selectedRange: { type: [Array, null], default: null }, // [min,max] or null
+  pinErrorMessage: { type: String, default: '' },
+  pinLoading: { type: Boolean, default: false }
 })
-const emit = defineEmits(['factor-change', 'range-change', 'legend-bin-click', 'toggle-overlay'])
+const emit = defineEmits(['factor-change', 'range-change', 'legend-bin-click', 'toggle-overlay', 'pin-search'])
 
 const showHelp = ref(false)
+const pinQuery = ref('')
+const pinErrorLocal = ref('')
+const pinErrorToDisplay = computed(() => props.pinErrorMessage || pinErrorLocal.value)
 
 const selectedFactorData = computed(() =>
   props.factors.find(f => f.id === props.selectedFactor) || props.factors[0]
@@ -154,6 +176,15 @@ function onLegendClick(i) {
   emit('range-change', null)
 }
 
+function submitPin() {
+  const query = pinQuery.value.trim()
+  if (!query) {
+    pinErrorLocal.value = 'Please enter a valid ZIP code.'
+    return
+  }
+  pinErrorLocal.value = ''
+  emit('pin-search', query)
+}
 
 
 function intersectsSelected(i) {
@@ -223,6 +254,111 @@ function fmt(n) { return (typeof n === 'number' && isFinite(n)) ? (Math.abs(n) %
   padding: 12px;
   border-radius: 8px;
   margin-top: 8px
+}
+
+.pin-lookup {
+  background: #fff;
+  border: 1px solid #e4e6f1;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 16px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.pin-lookup label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #1f2937;
+}
+
+.pin-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.pin-input-row input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #cbd5f0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pin-input-row input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 64px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary:not(:disabled):hover {
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-primary .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+  margin-right: 6px;
+}
+
+.pin-hint {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 6px 0 0;
+}
+
+.pin-error {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #dc2626;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .legend-title-row {

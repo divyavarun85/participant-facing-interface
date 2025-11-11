@@ -1,24 +1,28 @@
 <template>
     <div class="environmental-map-container">
         <MapControls :factors="factors" :selected-factor="selectedFactor" :legend-bins="legendBins"
-            :palette="active.colors" :selected-range="currentRange" @factor-change="onFactorChange"
-            @range-change="onRangeChange" @toggle-overlay="overlayOn = $event" />
+            :palette="active.colors" :selected-range="currentRange" :pin-error-message="pinErrorMessage"
+            :pin-loading="pinLoading" @factor-change="onFactorChange" @range-change="onRangeChange"
+            @toggle-overlay="overlayOn = $event" @pin-search="handlePinSearch" />
         <div class="map-wrapper">
 
             <MapHexLayer v-if="dataObj" :data="dataObj" :style="style" :mapStyle="mapStyle"
-                :valueField="active.valueField" :breaks="active.breaks" :colors="active.colors" :center="center"
-                :zoom="zoom" :filter="layerFilter" :hoverHighlight="true" :zoomOnClick="true" :zoomOnClickTarget="8"
-                :statesUrl="statesGeoUrl" :showStateBorders="true" :tooltipFields="tooltipFields" />
+                :valueField="active.valueField" :breaks="active.breaks" :colors="active.colors" :center="mapCenter"
+                :zoom="mapZoom" :filter="layerFilter" :hoverHighlight="true" :zoomOnClick="true" :zoomOnClickTarget="8"
+                :statesUrl="statesGeoUrl" :showStateBorders="true" :selectedHexIds="selectedHexIds"
+                :selectedHexColor="'#111827'" :tooltipFields="tooltipFields" />
 
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import MapControls from './MapControls.vue'
 import MapHexLayer from './MapHexLayer.vue'
 import { MAP_STYLE } from '../config/mapStyle'
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon'
+import { point as turfPoint } from '@turf/helpers'
 
 const props = defineProps({
     data: { type: [String, Object], required: true },
@@ -33,6 +37,12 @@ const dataObj = ref(null)
 const selectedFactor = ref(props.initialFactorId)
 const numericKeys = ref([])
 const stats = ref({})  // { key: {min, max, q20,q40,q60,q80} }
+const mapCenter = ref(Array.isArray(props.center) ? [...props.center] : [-98.6, 39.8])
+const mapZoom = ref(typeof props.zoom === 'number' ? props.zoom : 3.4)
+const selectedHexIds = ref([])
+const pinLoading = ref(false)
+const pinErrorMessage = ref('')
+const zipCache = new Map() // cache zip lookups
 
 function isNumeric(v) { return typeof v === 'number' && Number.isFinite(v) }
 
@@ -204,6 +214,74 @@ const tooltipFields = computed(() => {
         makeField('Social Vulnerability', 'SPL_SVM', 2)
     ]
 })
+
+watch(() => props.center, value => {
+    if (!Array.isArray(value) || value.length < 2) return
+    mapCenter.value = [...value]
+})
+
+watch(() => props.zoom, value => {
+    if (!Number.isFinite(value)) return
+    mapZoom.value = value
+})
+
+async function handlePinSearch(zip) {
+    const query = (zip || '').trim()
+    pinLoading.value = true
+    pinErrorMessage.value = ''
+    selectedHexIds.value = []
+
+    try {
+        if (!query) throw new Error('Please enter a valid ZIP code.')
+        const features = dataObj.value?.features || []
+        if (!features.length) throw new Error('Map data is still loading. Please try again in a moment.')
+
+        let cached = zipCache.get(query)
+        let lat, lng, hexIds
+
+        if (cached) {
+            ({ lat, lng, hexIds } = cached)
+        } else {
+            const response = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(query)}`)
+            if (!response.ok) throw new Error('ZIP code not found.')
+            const zipData = await response.json()
+            const place = zipData.places?.[0]
+            if (!place) throw new Error('ZIP code not found.')
+
+            lat = Number(place.latitude)
+            lng = Number(place.longitude)
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) throw new Error('ZIP returned invalid coordinates.')
+
+            const pt = turfPoint([lng, lat])
+            const matches = features.filter(feature => booleanPointInPolygon(pt, feature))
+
+            if (!matches.length) throw new Error('ZIP code falls outside the data coverage area.')
+
+            hexIds = matches.map(feature => {
+                const rawHexId = feature.properties?.hex_id
+                if (rawHexId === undefined || rawHexId === null) return null
+                const numeric = Number(rawHexId)
+                return Number.isFinite(numeric) ? numeric : String(rawHexId)
+            }).filter(id => id !== null)
+
+            if (!hexIds.length) throw new Error('Matching hex is missing an identifier.')
+
+            zipCache.set(query, { lat, lng, hexIds })
+        }
+
+        selectedHexIds.value = [...new Set(hexIds)]
+        mapCenter.value = [lng, lat]
+        const targetZoom = mapZoom.value || props.zoom || 3.4
+        mapZoom.value = targetZoom < 7.2 ? 7.2 : targetZoom
+        pinErrorMessage.value = ''
+    } catch (error) {
+        console.error('Pin search failed', error)
+        selectedHexIds.value = []
+        pinErrorMessage.value = error?.message || 'Could not locate that ZIP code.'
+    } finally {
+        pinLoading.value = false
+    }
+}
 </script>
 
 <style scoped>
