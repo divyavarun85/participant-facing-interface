@@ -1,17 +1,39 @@
 <template>
-    <div class="environmental-map-container">
-        <MapControls :factors="factors" :selected-factor="selectedFactor" :legend-bins="legendBins"
-            :palette="active.colors" :selected-range="currentRange" :pin-error-message="pinErrorMessage"
-            :pin-loading="pinLoading" @factor-change="onFactorChange" @range-change="onRangeChange"
-            @toggle-overlay="overlayOn = $event" @pin-search="handlePinSearch" />
-        <div class="map-wrapper">
+    <div class="environmental-map-shell">
+        <header class="app-header">
+            <div class="app-header__logo">
+                <span class="logo-wordmark">
+                    <span class="logo-wordmark-primary">All</span>
+                    <span class="logo-wordmark-secondary">ofUs</span>
+                </span>
+                <span class="logo-tagline">Research Program</span>
+            </div>
+            <nav class="app-header__nav">
+                <a href="#" class="nav-link">Home</a>
+                <a href="#" class="nav-link">To Do</a>
+                <a href="#" class="nav-link">My Data</a>
+                <a href="#" class="nav-link">Partner Studies</a>
+                <a href="#" class="nav-link">Support</a>
+            </nav>
+            <div class="app-header__user">
+                <div class="user-avatar">DV</div>
+                <span class="user-name">Divya Varun</span>
+            </div>
+        </header>
+        <div class="environmental-map-container">
+            <MapControls :factors="factors" :selected-factor="selectedFactor" :legend-bins="legendBins"
+                :palette="active.colors" :selected-range="currentRange" :pin-error-message="pinErrorMessage"
+                :pin-loading="pinLoading" @factor-change="onFactorChange" @range-change="onRangeChange"
+                @toggle-overlay="overlayOn = $event" @pin-search="handlePinSearch" />
+            <div class="map-wrapper">
 
-            <MapHexLayer v-if="dataObj" :data="dataObj" :style="style" :mapStyle="mapStyle"
-                :valueField="active.valueField" :breaks="active.breaks" :colors="active.colors" :center="mapCenter"
-                :zoom="mapZoom" :filter="layerFilter" :hoverHighlight="true" :zoomOnClick="true" :zoomOnClickTarget="8"
-                :statesUrl="statesGeoUrl" :showStateBorders="true" :selectedHexIds="selectedHexIds"
-                :selectedHexColor="'#111827'" :tooltipFields="tooltipFields" />
+                <MapHexLayer v-if="dataObj" :data="dataObj" :style="style" :mapStyle="mapStyle"
+                    :valueField="active.valueField" :breaks="active.breaks" :colors="active.colors" :center="mapCenter"
+                    :zoom="mapZoom" :filter="layerFilter" :hoverHighlight="true" :zoomOnClick="true"
+                    :zoomOnClickTarget="8" :statesUrl="statesGeoUrl" :showStateBorders="true"
+                    :selectedHexIds="selectedHexIds" :selectedHexColor="'#111827'" :tooltipFields="tooltipFields" />
 
+            </div>
         </div>
     </div>
 </template>
@@ -76,7 +98,7 @@ onMounted(async () => {
 const catalog = [
     {
         id: 'pm25', name: 'Air Quality (PM2.5)', unit: 'μg/m³', key: 'E_PM',
-        palette: ['#fff7ed', '#ffedd5', '#fed7aa', '#fdba74', '#fb923c']
+        palette: ['#a93b07', '#d76622', '#f18b49', '#f9b282', '#fdd8b4']
     },
     {
         id: 'asthma', name: 'Asthma Rates', unit: '%', key: 'EP_ASTHMA',
@@ -84,15 +106,15 @@ const catalog = [
     },
     {
         id: 'pm25pct', name: 'PM2.5 Percentile', unit: '0–1', key: 'EPL_PM',
-        palette: ['#f0f9ff', '#e0f2fe', '#cfe0fc', '#a9c6f8', '#7fa6f2']
+        palette: ['#edf2ff', '#d6e4ff', '#adc8ff', '#7c9dec', '#4a6ed6']
     },
     {
         id: 'svm', name: 'Social Vulnerability', unit: 'index', key: 'SPL_SVM',
-        palette: ['#fde2e4', '#f6d1d7', '#d7e3f4', '#c6daf1', '#9ab8e8']
+        palette: ['#f8d2d4', '#efa6b1', '#d4bde8', '#a9b5ef', '#7c94da']
     },
     {
         id: 'pop', name: 'Population (×1k)', unit: 'k', key: 'E_TOTPOP',
-        palette: ['#f8fafc', '#e2e8f0', '#cbd5f5', '#a5b4cf', '#8893ad']
+        palette: ['#f4f5f9', '#dce0ee', '#bec7e0', '#9aa7c8', '#6e7ba6']
     },
 ]
 // factors shown = only those whose key exists & has stats
@@ -280,14 +302,101 @@ async function handlePinSearch(zip) {
 </script>
 
 <style scoped>
-.environmental-map-container {
+.environmental-map-shell {
+    min-height: 100vh;
     display: flex;
-    height: 100vh;
+    flex-direction: column;
+    background: #f1f5f9;
+}
+
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.app-header__logo {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+
+.logo-wordmark {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.logo-wordmark-primary {
+    color: #1d4ed8;
+}
+
+.logo-wordmark-secondary {
+    color: #111827;
+    margin-left: 2px;
+}
+
+.logo-tagline {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+.app-header__nav {
+    display: flex;
+    gap: 24px;
+}
+
+.nav-link {
+    font-size: 13px;
+    color: #1d4ed8;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    text-decoration: underline;
+}
+
+.app-header__user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #94a3b8;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.user-name {
+    font-size: 13px;
+    color: #1f2937;
+    font-weight: 500;
+}
+
+.environmental-map-container {
+    flex: 1;
+    display: flex;
+    min-height: 0;
 }
 
 .map-wrapper {
     flex: 1;
     position: relative;
-    height: 100%;
+    min-height: 0;
 }
 </style>

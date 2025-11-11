@@ -79,8 +79,8 @@ function findFirstLabelLayerId() {
 
 function hoverOpacityExpr() {
   return props.hoverHighlight
-    ? ['case', ['boolean', ['feature-state', 'hover'], false], 0.85, 0.6]
-    : 0.6
+    ? ['case', ['boolean', ['feature-state', 'hover'], false], 0.9, 0.75]
+    : 0.75
 }
 
 function applyFilter() {

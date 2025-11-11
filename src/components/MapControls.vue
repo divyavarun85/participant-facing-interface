@@ -1,44 +1,62 @@
 <template>
-  <div class="map-controls">
-    <!-- Header -->
-    <div class="panel-header">
-      <h2>Environmental Explorer</h2>
+  <aside class="map-controls">
+    <header class="panel-header">
+      <div>
+        <h2>Participant Facing Interface</h2>
+      </div>
       <button class="help-toggle" @click="showHelp = !showHelp" :aria-label="showHelp ? 'Close help' : 'Show help'">
         {{ showHelp ? '✕' : '?' }}
       </button>
-    </div>
+    </header>
 
-    <!-- Help -->
-    <div v-if="showHelp" class="help-panel">
-      <h3>How to Use This Map</h3>
-      <p>Each hexagon is colored by the current factor. The legend below shows what each color means.</p>
-      <ul>
-        <li><b>Pan</b>: drag • <b>Zoom</b>: scroll or buttons • <b>Details</b>: hover a hex</li>
-      </ul>
-    </div>
+    <transition name="collapse">
+      <section v-if="showHelp" class="panel card card-muted">
+        <h3>Quick Tips</h3>
+        <ul>
+          <li>Use the dropdown to swap between indicators.</li>
+          <li>Click legend bands to focus specific ranges.</li>
+          <li>Enter a ZIP code to zoom directly to that area.</li>
+        </ul>
+      </section>
+    </transition>
+    <section class="panel card">
+      <label class="field-label" for="pin-input">Locate a ZIP / Postal Code</label>
+      <div class="pin-input-row">
+        <div class="field-control">
+          <input id="pin-input" v-model="pinQuery" type="text" placeholder="Enter ZIP e.g. 37209" inputmode="numeric"
+            @keyup.enter="submitPin" />
+        </div>
+        <button class="btn-primary" @click="submitPin" :disabled="pinLoading || !pinQuery.trim()">
+          <span v-if="pinLoading" class="spinner" aria-hidden="true"></span>
+          <span>{{ pinLoading ? 'Searching…' : 'Locate' }}</span>
+        </button>
+      </div>
+      <transition name="fade">
+        <p v-if="pinErrorToDisplay" class="feedback feedback-error">{{ pinErrorToDisplay }}</p>
+      </transition>
+    </section>
+    <section class="panel card">
+      <label class="field-label" for="factor-select">Environmental Factor</label>
+      <div class="field-control">
+        <select id="factor-select" :value="selectedFactor"
+          @change="$emit('factor-change', ($event.target && $event.target.value) || selectedFactor)">
+          <option v-for="f in factors" :key="f.id" :value="f.id">{{ f.name }}</option>
+        </select>
+      </div>
+    </section>
 
-    <!-- Factor -->
-    <div class="factor-selector">
-      <label for="factor-select">Select Environmental Factor:</label>
-      <select id="factor-select" :value="selectedFactor"
-        @change="$emit('factor-change', ($event.target && $event.target.value) || selectedFactor)">
-        <option v-for="f in factors" :key="f.id" :value="f.id">{{ f.name }}</option>
-      </select>
-    </div>
-
-    <!-- Legend -->
-    <div class="legend">
-      <div class="legend-title-row">
-        <h3 class="legend-title">{{ selectedFactorData.name }} Legend</h3>
-        <small v-if="unit" class="legend-unit">Unit: {{ unit }}</small>
+    <section class="panel card">
+      <div class="panel-heading">
+        <div>
+          <h3 class="panel-heading-title">{{ selectedFactorData.name }}</h3>
+          <p v-if="unit" class="panel-heading-meta">Unit {{ unit }}</p>
+        </div>
       </div>
 
-      <!-- Color ribbon (nice overview) -->
       <div class="legend-ribbon" :style="{ background: ribbonGradient }" aria-hidden="true"></div>
 
-      <!-- Clickable bins -->
       <div class="legend-scale" role="list">
-        <button v-for="(bin, i) in legendBins" :key="i" class="legend-item" type="button"
+        <button v-for="(bin, i) in legendBins" :key="`${bin.range}-${i}`" class="legend-item" type="button"
           :aria-label="`Filter to ${bin.range} (${bin.label || 'bin'})`" @click="onLegendClick(i)">
           <span class="legend-swatch" :style="{ backgroundColor: bin.color }" />
           <span class="legend-text">
@@ -47,63 +65,56 @@
           </span>
           <span v-if="intersectsSelected(i)" class="legend-active-dot" title="Included in current filter" />
         </button>
-
-
-
       </div>
 
-      <!-- Current filter chip -->
-      <div v-if="selectedRange" class="filter-chip">
-        Filter: {{ fmt(selectedRange[0]) }} – {{ fmt(selectedRange[1]) }}
-        <button class="chip-x" @click="$emit('range-change', null)" aria-label="Clear filter">✕</button>
-      </div>
-    </div>
-
-    <!-- Optional overlay toggle -->
-    <label class="overlay-toggle">
-      <input type="checkbox" :checked="overlay"
-        @change="$emit('toggle-overlay', $event.target && $event.target.checked)" />
-      Show no-data overlay
-    </label>
-
-    <!-- Pin lookup -->
-    <div class="pin-lookup">
-      <label for="pin-input">Find a ZIP / Postal Code</label>
-      <div class="pin-input-row">
-        <input id="pin-input" v-model="pinQuery" type="text" placeholder="e.g. 37209" inputmode="numeric"
-          @keyup.enter="submitPin" />
-        <button class="btn-primary" @click="submitPin" :disabled="pinLoading || !pinQuery.trim()">
-          <span v-if="pinLoading" class="spinner" aria-hidden="true"></span>
-          <span>{{ pinLoading ? 'Searching…' : 'Go' }}</span>
-        </button>
-      </div>
-      <p class="pin-hint">Enter a ZIP code to jump and highlight the corresponding hex.</p>
       <transition name="fade">
-        <p v-if="pinErrorToDisplay" class="pin-error">{{ pinErrorToDisplay }}</p>
+        <div v-if="selectedRange" class="filter-chip">
+          <span>Filter: {{ fmt(selectedRange[0]) }} – {{ fmt(selectedRange[1]) }}</span>
+          <button class="chip-x" @click="$emit('range-change', null)" aria-label="Clear filter">✕</button>
+        </div>
       </transition>
-    </div>
+    </section>
 
-    <!-- Numeric range controls -->
-    <div class="legend" style="margin-top:12px">
-      <label class="range-label">Filter range</label>
 
-      <div class="range-row">
-        <input type="number" class="range-num" :value="min" @input="updateMin($event.target && $event.target.value)" />
-        <input type="range" :min="domain.min" :max="domain.max" step="any" :value="min"
-          @input="updateMin($event.target && $event.target.value)" />
-      </div>
 
-      <div class="range-row">
-        <input type="number" class="range-num" :value="max" @input="updateMax($event.target && $event.target.value)" />
-        <input type="range" :min="domain.min" :max="domain.max" step="any" :value="max"
-          @input="updateMax($event.target && $event.target.value)" />
-        <div class="range-actions">
-          <button class="btn-clear" @click="$emit('range-change', null)">Clear filter</button>
-          <span class="domain-help">Domain: {{ fmt(domain.min) }} – {{ fmt(domain.max) }}</span>
+
+    <section class="panel card">
+      <div class="panel-heading">
+        <div>
+          <h3 class="panel-heading-title">Value Filter</h3>
+          <p class="panel-heading-meta">Domain {{ fmt(domain.min) }} – {{ fmt(domain.max) }}</p>
         </div>
       </div>
-    </div>
-  </div>
+
+      <div class="range-row">
+        <label class="range-group">
+          <span>Minimum</span>
+          <div class="range-controls">
+            <input type="number" class="range-num" :value="min"
+              @input="updateMin($event.target && $event.target.value)" />
+            <input type="range" :min="domain.min" :max="domain.max" step="any" :value="min"
+              @input="updateMin($event.target && $event.target.value)" />
+          </div>
+        </label>
+      </div>
+
+      <div class="range-row">
+        <label class="range-group">
+          <span>Maximum</span>
+          <div class="range-controls">
+            <input type="number" class="range-num" :value="max"
+              @input="updateMax($event.target && $event.target.value)" />
+            <input type="range" :min="domain.min" :max="domain.max" step="any" :value="max"
+              @input="updateMax($event.target && $event.target.value)" />
+          </div>
+        </label>
+      </div>
+
+      <div class="range-actions">
+        <button class="btn-muted" @click="$emit('range-change', null)">Reset range</button>
+      </div>
+    </section>
+  </aside>
 </template>
 
 <script setup>
@@ -185,8 +196,6 @@ function submitPin() {
   pinErrorLocal.value = ''
   emit('pin-search', query)
 }
-
-
 function intersectsSelected(i) {
   if (!props.selectedRange) return false
   const [lo, hi] = props.selectedRange
@@ -204,38 +213,352 @@ function fmt(n) { return (typeof n === 'number' && isFinite(n)) ? (Math.abs(n) %
 
 <style scoped>
 .map-controls {
-  width: 350px;
-  background: #fff;
-  border-right: 1px solid #e0e0e0;
-  overflow: auto;
-  padding: 20px;
-  box-shadow: 2px 0 4px rgba(0, 0, 0, .08)
+  width: 340px;
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  overflow-y: auto;
+  padding: 28px 24px;
+  box-shadow: inset -1px 0 0 rgba(17, 24, 39, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .panel-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #eee
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+
+.panel-eyebrow {
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  margin: 0 0 6px;
+}
+
+.panel-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
 }
 
 .help-toggle {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid #ddd;
-  background: #f8f9fa;
-  cursor: pointer
+  border: 1px solid #cbd5f5;
+  background: #f8fafc;
+  cursor: pointer;
+  font-size: 16px;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
-.help-panel {
-  background: #f8f9fa;
-  padding: 12px;
+.help-toggle:hover {
+  background: #e2e8f0;
+}
+
+.panel,
+.card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 18px 20px;
+  box-shadow: 0 1px 2px rgba(148, 163, 184, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card-muted {
+  background: #f8fafc;
+  border-style: dashed;
+}
+
+.panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-heading-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.panel-heading-meta {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  letter-spacing: 0.02em;
+}
+
+.field-control select,
+.field-control input[type="text"],
+.field-control input[type="number"] {
+  width: 100%;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid #cbd5f5;
   border-radius: 8px;
-  margin-bottom: 16px;
-  font-size: 14px
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.field-control select:focus,
+.field-control input[type="text"]:focus,
+.field-control input[type="number"]:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.legend-ribbon {
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.legend-scale {
+  display: grid;
+  gap: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.legend-item:hover {
+  border-color: #cbd5f5;
+  background: #eef2ff;
+}
+
+.legend-swatch {
+  width: 30px;
+  height: 18px;
+  border-radius: 6px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.legend-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  color: #1f2937;
+  flex: 1;
+}
+
+.legend-sub {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.legend-active-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #1d4ed8;
+  font-size: 12px;
+}
+
+.chip-x {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+}
+
+.toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.toggle-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
+.pin-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 80px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary:not(:disabled):hover {
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-primary .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+}
+
+.feedback {
+  font-size: 12px;
+  margin: 0;
+}
+
+.feedback-error {
+  color: #dc2626;
+}
+
+.range-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.range-group span {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.range-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.range-controls input[type="number"] {
+  width: 100px;
+}
+
+.range-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-muted {
+  padding: 8px 12px;
+  border: 1px solid #cbd5f5;
+  background: #f8fafc;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #2563eb;
+  transition: all 0.2s ease;
+}
+
+.btn-muted:hover {
+  background: #e2e8f0;
+}
+
+.collapse-enter-active,
+.collapse-leave-active {
+  transition: all 0.2s ease;
+}
+
+.collapse-enter-from,
+.collapse-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.pin-input-row input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.range-num {
+  padding: 8px 10px;
+  border: 1px solid #cbd5f5;
+  border-radius: 6px;
+}
+
+.range-controls input[type="range"] {
+  flex: 1;
+}
+
+.help-panel ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #475569;
+  font-size: 13px;
+}
+
+#factor-select {
+  appearance: none;
+  cursor: pointer;
 }
 
 .factor-selector {
