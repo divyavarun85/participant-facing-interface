@@ -4,16 +4,18 @@
             <div class="app-header__logo">
                 <span class="logo-wordmark">
                     <span class="logo-wordmark-primary">All</span>
-                    <span class="logo-wordmark-secondary">ofUs</span>
+                    <span class="logo-wordmark-of">of</span>
+                    <span class="logo-wordmark-primary">Us</span>
                 </span>
                 <span class="logo-tagline">Research Program</span>
             </div>
             <nav class="app-header__nav">
-                <a href="#" class="nav-link">Home</a>
-                <a href="#" class="nav-link">To Do</a>
-                <a href="#" class="nav-link">My Data</a>
-                <a href="#" class="nav-link">Partner Studies</a>
-                <a href="#" class="nav-link">Support</a>
+                <span class="nav-link">Home</span>
+                <span class="nav-link">To Do</span>
+                <span class="nav-link">My Data</span>
+                <span class="nav-link">Partner Studies</span>
+                <span class="nav-link">Support</span>
+                <span class="nav-link nav-link--highlight">Environmental Map</span>
             </nav>
             <div class="app-header__user">
                 <div class="user-avatar">DV</div>
@@ -313,10 +315,10 @@ async function handlePinSearch(zip) {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 28px;
+    padding: 16px 32px;
     background: #ffffff;
-    border-bottom: 1px solid #e2e8f0;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .app-header__logo {
@@ -326,25 +328,34 @@ async function handlePinSearch(zip) {
 }
 
 .logo-wordmark {
-    font-size: 20px;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-size: 24px;
     font-weight: 700;
+    letter-spacing: 0.01em;
 }
 
 .logo-wordmark-primary {
-    color: #1d4ed8;
+    color: #1c2a7d;
+    font-weight: Extrabold;
+    font-family: 'Gotham Rounded';
+
 }
 
-.logo-wordmark-secondary {
-    color: #111827;
-    margin-left: 2px;
+.logo-wordmark-of {
+    color: #5aa5d6;
+    font-style: italic;
+    font-size: 22px;
+    font-weight: 600;
 }
 
 .logo-tagline {
-    font-size: 10px;
-    letter-spacing: 0.14em;
+    margin-top: 6px;
+    font-size: 8.5px;
     text-transform: uppercase;
-    color: #64748b;
-    margin-top: 4px;
+    color: #1c2a7d;
+    font-weight: 900;
 }
 
 .app-header__nav {
@@ -354,13 +365,26 @@ async function handlePinSearch(zip) {
 
 .nav-link {
     font-size: 13px;
-    color: #1d4ed8;
-    text-decoration: none;
+    color: #1e4f86;
     font-weight: 500;
+    cursor: default;
 }
 
-.nav-link:hover {
-    text-decoration: underline;
+.nav-link--highlight {
+    color: #1e4f86;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 4px;
+}
+
+.nav-link--highlight::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: #1e4f86;
 }
 
 .app-header__user {
