@@ -81,7 +81,7 @@ function summarize(key, features) {
 onMounted(async () => {
     dataObj.value = typeof props.data === 'string' ? await (await fetch(props.data)).json() : props.data
     const feats = dataObj.value.features || []
-    // discover numeric properties present on most features
+
     const sample = feats.slice(0, 2000)
     const keys = new Set()
     sample.forEach(f => Object.entries(f.properties || {}).forEach(([k, v]) => { if (isNumeric(v)) keys.add(k) }))
