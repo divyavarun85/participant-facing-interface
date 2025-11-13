@@ -300,10 +300,10 @@ onMounted(() => {
             'line-color': '#ffffff',
             'line-width': [
               'interpolate', ['linear'], ['zoom'],
-              3, 1.2,
-              6, 1.6,
-              8, 2.4,
-              10, 3
+              3, 3.5,
+              6, 4.5,
+              8, 6,
+              10, 8
             ],
             'line-opacity': 0.9
           },
@@ -318,10 +318,10 @@ onMounted(() => {
             'line-color': '#170202',
             'line-width': [
               'interpolate', ['linear'], ['zoom'],
-              3, 0.35,
-              6, 0.55,
-              8, 0.8,
-              10, 1.1
+              3, 2,
+              6, 2.5,
+              8, 3.5,
+              10, 4.5
             ],
             'line-opacity': 0.85
           },
