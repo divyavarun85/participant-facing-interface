@@ -274,6 +274,14 @@ const tooltipFields = computed(() => {
         formatter: value => formatValue(value, digits, unit)
     })
 
+    // Build list of additional fields, excluding the currently selected metric to avoid duplication
+    const additionalFields = [
+        makeField('Population', 'E_TOTPOP', 0),
+        makeField('PM2.5 Percentile', 'EPL_PM', 2),
+        makeField('Asthma Rate', 'EP_ASTHMA', 1, '%'),
+        makeField('Social Vulnerability', 'SPL_SVM', 2)
+    ].filter(field => field.property !== metric.valueField)
+
     return [
         {
             label: 'Location',
@@ -281,10 +289,7 @@ const tooltipFields = computed(() => {
             formatter: locationFormatter
         },
         makeField(metric.name, metric.valueField, 2, metric.unit),
-        makeField('Population', 'E_TOTPOP', 0),
-        makeField('PM2.5 Percentile', 'EPL_PM', 2),
-        makeField('Asthma Rate', 'EP_ASTHMA', 1, '%'),
-        makeField('Social Vulnerability', 'SPL_SVM', 2)
+        ...additionalFields
     ]
 })
 
