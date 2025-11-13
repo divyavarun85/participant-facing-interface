@@ -24,7 +24,7 @@ export default {
 
 export const Default = {
   args: {
-     data: '/chel2022_wgs84.geojson',  // file in public/
+     data: '/chel2022_wgs84_clipped.geojson',  // file in public/ - clipped to US boundary
     factors: baseFactors,
     initialFactorId: 'pm25',
     center: [-98.6, 39.8],

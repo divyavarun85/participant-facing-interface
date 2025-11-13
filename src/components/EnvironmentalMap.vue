@@ -57,6 +57,7 @@ const props = defineProps({
     initialFactorId: { type: String, default: 'pm25' }
 })
 
+const STATES_GEO_URL = 'https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json'
 const dataObj = ref(null)
 const selectedFactor = ref(props.initialFactorId)
 const numericKeys = ref([])
@@ -80,21 +81,74 @@ function summarize(key, features) {
     }
 }
 
-onMounted(async () => {
-    dataObj.value = typeof props.data === 'string' ? await (await fetch(props.data)).json() : props.data
-    const feats = dataObj.value.features || []
+async function prepareFeatureCollection(dataSource) {
+    if (!dataSource) return null
+    const rawData = typeof dataSource === 'string'
+        ? await fetch(dataSource, { cache: 'no-store' }).then(res => {
+            if (!res.ok) throw new Error(`Failed to load dataset (${res.status})`)
+            return res.json()
+        })
+        : dataSource
 
+    if (!rawData) return null
+    return rawData
+}
+
+async function initializeFromData(dataSource) {
+    const preparedData = await prepareFeatureCollection(dataSource)
+    if (!preparedData) throw new Error('Environmental map data is unavailable.')
+
+    dataObj.value = preparedData
+    zipCache.clear()
+    selectedHexIds.value = []
+    pinErrorMessage.value = ''
+
+    const feats = preparedData.features || []
     const sample = feats.slice(0, 2000)
     const keys = new Set()
     sample.forEach(f => Object.entries(f.properties || {}).forEach(([k, v]) => { if (isNumeric(v)) keys.add(k) }))
     numericKeys.value = Array.from(keys)
 
-    // precompute stats
-    numericKeys.value.forEach(k => { const s = summarize(k, feats); if (s) stats.value[k] = s })
+    stats.value = {}
+    numericKeys.value.forEach(k => {
+        const s = summarize(k, feats)
+        if (s) stats.value[k] = s
+    })
 
-    // default to E_PM if present
-    if (numericKeys.value.includes('E_PM')) selectedFactor.value = 'pm25'
+    const availableFactorIds = new Set(
+        catalog.filter(c => stats.value[c.key]).map(c => c.id)
+    )
+    const previousSelection = selectedFactor.value
+    if (previousSelection && availableFactorIds.has(previousSelection)) {
+        selectedFactor.value = previousSelection
+    } else if (availableFactorIds.has('pm25')) {
+        selectedFactor.value = 'pm25'
+    } else {
+        const firstAvailable = availableFactorIds.values().next().value
+        if (firstAvailable) selectedFactor.value = firstAvailable
+    }
+}
+
+onMounted(async () => {
+    try {
+        await initializeFromData(props.data)
+    } catch (error) {
+        console.error('Failed to prepare environmental map data:', error)
+        dataObj.value = typeof props.data === 'object' ? props.data : null
+    }
 })
+
+watch(
+    () => props.data,
+    async newSource => {
+        if (!newSource) return
+        try {
+            await initializeFromData(newSource)
+        } catch (error) {
+            console.error('Failed to refresh environmental map data:', error)
+        }
+    }
+)
 
 /** factor catalog (labels + mapping to CHEL keys) */
 const catalog = [
@@ -182,7 +236,7 @@ const layerFilter = computed(() => {
 function onFactorChange(id) { selectedFactor.value = id; currentRange.value = null }
 function onRangeChange(range) { currentRange.value = range }
 
-const statesGeoUrl = 'https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json'
+const statesGeoUrl = STATES_GEO_URL
 
 let overlayOn = ref(false) // kept if you add an overlay toggle
 
