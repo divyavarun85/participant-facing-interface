@@ -34,7 +34,11 @@
                     :zoom="mapZoom" :filter="layerFilter" :hoverHighlight="true" :zoomOnClick="true"
                     :zoomOnClickTarget="8" :statesUrl="statesGeoUrl" :showStateBorders="true"
                     :selectedHexIds="selectedHexIds" :selectedHexColor="'#111827'" :tooltipFields="tooltipFields"
-                    :searchPinLocation="searchPinLocation" />
+                    :searchPinLocation="searchPinLocation" @hex-click="handleHexClick" />
+
+                <!-- Right Sidebar for Hex Data -->
+                <HexDataSidebar v-if="selectedHexFeature" :feature="selectedHexFeature" :factors="factors"
+                    :stats="stats.value" @close="selectedHexFeature = null" />
 
             </div>
         </div>
@@ -45,6 +49,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import MapControls from './MapControls.vue'
 import MapHexLayer from './MapHexLayer.vue'
+import HexDataSidebar from './HexDataSidebar.vue'
 import { MAP_STYLE } from '../config/mapStyle'
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon'
 import { point as turfPoint } from '@turf/helpers'
@@ -70,6 +75,7 @@ const pinLoading = ref(false)
 const pinErrorMessage = ref('')
 const zipCache = new Map() // cache zip/address lookups
 const searchPinLocation = ref(null) // [lng, lat] for the searched location pin
+const selectedHexFeature = ref(null) // Feature data for the clicked hex
 
 function isNumeric(v) { return typeof v === 'number' && Number.isFinite(v) }
 
@@ -255,6 +261,7 @@ const layerFilter = computed(() => {
 
 function onFactorChange(id) { selectedFactor.value = id; currentRange.value = null }
 function onRangeChange(range) { currentRange.value = range }
+function handleHexClick(feature) { selectedHexFeature.value = feature }
 
 const statesGeoUrl = STATES_GEO_URL
 

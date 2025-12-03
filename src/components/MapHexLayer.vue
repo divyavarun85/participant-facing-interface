@@ -6,6 +6,8 @@
 import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import maplibregl from 'maplibre-gl'
 
+const emit = defineEmits(['hex-click'])
+
 const props = defineProps({
   data: { type: [String, Object], required: true },
   mapStyle: { type: [String, Object], required: true },
@@ -209,6 +211,9 @@ function handleFeatureClick(e) {
   if (!map) return
   const feature = e.features?.[0]
   if (!feature) return
+
+  // Emit hex-click event with feature data for sidebar
+  emit('hex-click', feature)
 
   if (props.zoomOnClick) {
     const targetZoom = Math.max(props.zoomOnClickTarget, map.getZoom())
