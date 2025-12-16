@@ -161,28 +161,28 @@ watch(
 const catalog = [
     {
         id: 'pm25', name: 'Air Quality', unit: '', key: 'E_PM',
-        // Reversed color scheme (muted for screen): Purple (Very Low PM2.5) → Red → Orange → Yellow → Green (Very High PM2.5)
-        // Lower PM2.5 values = darker colors (purple), Higher PM2.5 values = lighter colors (green)
-        // Colors are desaturated/darkened versions of EPA AQI colors for better screen visibility
-        palette: ['#7a3a82', '#cc4444', '#cc7044', '#cccc44', '#44cc44']
+        // Grayscale: Light gray (low PM2.5) → Dark gray (high PM2.5)
+        palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525']
     },
     {
         id: 'asthma', name: 'Asthma Rates', unit: '', key: 'EP_ASTHMA',
-        // Standard health data colors: Light blue (low) → Green → Yellow → Orange → Red (high)
-        palette: ['#e3f2fd', '#81d4fa', '#4fc3f7', '#ffb74d', '#ef5350']
+        // Grayscale: Light gray (low rates) → Dark gray (high rates)
+        palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525']
     },
     {
         id: 'pm25pct', name: 'Air Pollution Ranking', unit: '', key: 'EPL_PM',
-        // EPA AQI-style gradient: Light green → Yellow → Orange → Red → Dark red
-        palette: ['#c8e6c9', '#fff9c4', '#ffcc80', '#ff7043', '#c62828']
+        // Grayscale: Light gray (low ranking) → Dark gray (high ranking)
+        palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525']
     },
     {
         id: 'svm', name: 'Social Vulnerability', unit: '', key: 'SPL_SVM',
-        palette: ['#f8d2d4', '#efa6b1', '#d4bde8', '#a9b5ef', '#7c94da']
+        // Grayscale: Light gray (low vulnerability) → Dark gray (high vulnerability)
+        palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525']
     },
     {
         id: 'pop', name: 'Population', unit: '', key: 'E_TOTPOP',
-        palette: ['#f4f5f9', '#dce0ee', '#bec7e0', '#9aa7c8', '#6e7ba6']
+        // Grayscale: Light gray (low population) → Dark gray (high population)
+        palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525']
     },
 ]
 // factors shown = only those whose key exists & has stats

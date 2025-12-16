@@ -10,8 +10,8 @@ const OSM_RASTER_STYLE = {
 };
 
 const baseFactors = [
-  { id: 'pm25',   name: 'Air Quality (PM2.5)', unit: 'μg/m³', colorScale: ['#2c7bb6','#abd9e9','#ffffbf','#fdae61','#d7191c'] },
-  { id: 'heat',   name: 'Extreme Heat',        unit: 'days',  colorScale: ['#ffffcc','#ffeda0','#fed976','#feb24c','#fd8d3c','#fc4e2a','#e31a1c','#bd0026','#800026'] },
+  { id: 'pm25',   name: 'Air Quality (PM2.5)', unit: 'μg/m³', colorScale: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525'] },
+  { id: 'heat',   name: 'Extreme Heat',        unit: 'days',  colorScale: ['#f5f5f5', '#e0e0e0', '#cccccc', '#b0b0b0', '#969696', '#7a7a7a', '#636363', '#4a4a4a', '#252525'] },
 ];
 
 export default {
