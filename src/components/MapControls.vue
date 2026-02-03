@@ -23,7 +23,7 @@
       <label class="field-label" for="pin-input">Locate by ZIP Code or Address</label>
       <div class="pin-input-row">
         <div class="field-control ">
-          <input id="pin-input" v-model="pinQuery" type="text" placeholder="Search address, zip code, or location"
+          <input id="pin-input" v-model="pinQuery" type="text" placeholder="Search by zip code"
             @keyup.enter="submitPin" />
         </div>
         <button class="btn-primary" @click="submitPin" :disabled="pinLoading || !pinQuery.trim()">
