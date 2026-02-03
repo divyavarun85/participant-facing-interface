@@ -2,7 +2,7 @@
   <aside class="map-controls">
     <header class="panel-header">
       <div>
-        <h2>Participant Facing Interface</h2>
+        <h2>Public Facing Interface</h2>
       </div>
       <button class="help-toggle" @click="showHelp = !showHelp" :aria-label="showHelp ? 'Close help' : 'Show help'">
         {{ showHelp ? '✕' : '?' }}
