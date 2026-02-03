@@ -147,7 +147,15 @@ function getTooltipHtml(feature) {
     const locationField = fields.find(f => f.label === 'Location')
     const dataFields = fields.filter(f => f.label !== 'Location')
 
-    let html = '<div class="map-tooltip">'
+    let html = `<style>
+      .map-tooltip { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; min-width: 200px; }
+      .map-tooltip-header { font-weight: 600; font-size: 14px; color: #1f2937; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; }
+      .map-tooltip-data { display: flex; flex-direction: column; gap: 6px; }
+      .map-tooltip-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; }
+      .map-tooltip-label { color: #64748b; font-weight: 900; }
+      .map-tooltip-value { color: #1f2937; font-weight: 600; }
+    </style>`
+    html += '<div class="map-tooltip">'
 
     // Location header
     if (locationField) {
