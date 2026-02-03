@@ -5,6 +5,7 @@
 <script setup>
 import { onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue'
 import maplibregl from 'maplibre-gl'
+import { NavigationControl } from 'maplibre-gl'
 
 const emit = defineEmits(['hex-click'])
 
@@ -488,6 +489,9 @@ onMounted(() => {
 
     setTimeout(() => map.resize(), 0)
     updateSearchPin() // Initialize pin if location is already set
+
+    // Add zoom controls (zoom in/out buttons only, no compass)
+    map.addControl(new NavigationControl({ showCompass: false }), 'top-right')
   })
 })
 
