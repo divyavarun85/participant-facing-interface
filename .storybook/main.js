@@ -7,6 +7,9 @@ export default {
   ],
   addons: ['@storybook/addon-essentials'],
   staticDirs: ['../public'],
+  features: {
+    buildStoriesJson: false,
+  },
   async viteFinal(config) {
     config.define = { ...(config.define ?? {}), 'process.env': {} };
     return config;

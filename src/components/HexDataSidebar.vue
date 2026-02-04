@@ -223,6 +223,34 @@ function getPopulationContext() {
     animation: slideIn 0.3s ease-out;
 }
 
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .hex-data-sidebar {
+        width: 100%;
+        max-width: 100vw;
+        right: 0;
+        left: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .hex-data-sidebar {
+        padding: 16px;
+    }
+
+    .sidebar-header h3 {
+        font-size: 18px;
+    }
+
+    .stat-item-label {
+        font-size: 12px;
+    }
+
+    .stat-item-value {
+        font-size: 20px;
+    }
+}
+
 @keyframes slideIn {
     from {
         transform: translateX(100%);
