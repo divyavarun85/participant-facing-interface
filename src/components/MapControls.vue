@@ -27,10 +27,10 @@
       </section>
     </transition>
     <section class="panel card">
-      <label class="field-label" for="pin-input">Locate by ZIP Code or Address</label>
+      <label class="field-label" for="pin-input">Find Your Location</label>
       <div class="pin-input-row">
         <div class="field-control ">
-          <input id="pin-input" v-model="pinQuery" type="text" placeholder="" @keyup.enter="submitPin" />
+          <input id="pin-input" v-model="pinQuery" type="text" placeholder="ZIP code or address" @keyup.enter="submitPin" />
         </div>
         <button class="btn-primary" @click="submitPin" :disabled="pinLoading || !pinQuery.trim()">
           <span v-if="pinLoading" class="spinner" aria-hidden="true"></span>
