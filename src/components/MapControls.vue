@@ -20,9 +20,9 @@
       <section v-if="showHelp" class="panel card card-muted">
         <h3>Quick Tips</h3>
         <ul>
-          <li>Use the dropdown to swap between indicators.</li>
-          <li>Click legend bands to focus specific ranges.</li>
           <li>Enter a ZIP code or address to zoom directly to that area.</li>
+          <li>Click an environmental factor below to swap between indicators on the map.</li>
+          <li>Click legend bands to focus specific ranges.</li>
         </ul>
       </section>
     </transition>
