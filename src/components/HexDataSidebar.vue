@@ -1,71 +1,87 @@
 <template>
     <div class="hex-data-sidebar">
+        <!-- Header: dark theme bar with location + overall rating card -->
         <div class="sidebar-header">
-            <button class="close-button" @click="$emit('close')" aria-label="Close sidebar">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                </svg>
-            </button>
+            <div class="header-top">
+                <div class="header-title-block">
+                    <span class="location-pin" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    </span>
+                    <div>
+                        <h2 class="location-title">Hexagon {{ hexId }}</h2>
+                        <p class="location-subtitle">Geographic Area</p>
+                    </div>
+                </div>
+                <button class="close-button" @click="$emit('close')" aria-label="Close sidebar">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </button>
+            </div>
+            <div class="overall-rating-card" :class="getOverallRankClass()">
+                <span class="rating-label">Overall environmental burden</span>
+                <p class="rating-definition">Average of this area’s rankings across the factors below. Higher = greater environmental burden (e.g. more pollution, higher vulnerability).</p>
+                <div class="rating-row">
+                    <span class="rating-value">{{ getOverallRank() }}</span>
+                    <span class="rating-tag" :style="{ backgroundColor: getRankStyle(getOverallRank()).tagBg, color: getRankStyle(getOverallRank()).tagFg }">{{ getRankTagLabel(getOverallRank()) }}</span>
+                    <span v-if="isFavorable(getOverallRank())" class="rating-check" aria-hidden="true">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
+                </div>
+            </div>
         </div>
 
         <div class="sidebar-content">
-            <div class="location-info">
-                <h2 class="location-title">Hexagon {{ hexId }}</h2>
-                <p class="location-description">
-                    This hexagon represents a geographic area with environmental and demographic data
-                    collected as part of the CHEL 2022 dataset. The following information provides
-                    insights into the environmental conditions and characteristics of this region.
-                </p>
-            </div>
+            <p class="intro-text">
+                Environmental conditions and characteristics of this region.
+            </p>
 
-            <div class="data-section">
-                <h3 class="section-title">Overview</h3>
-                <div class="text-content">
-                    <p class="description-text">
-                        This hexagon has an overall ranking of <strong>{{ getOverallRank() }}</strong>
-                        when compared to other areas in the dataset. This area shows
-                        {{ getRankDescription() }} environmental characteristics.
-                    </p>
-                </div>
-            </div>
-
-            <div class="data-section">
-                <h3 class="section-title">Environmental Factors</h3>
-                <div class="factors-list">
-                    <div v-for="factor in factors" :key="factor.id" class="factor-item">
+            <h3 class="section-title">Environmental Factors</h3>
+            <div class="factors-list">
+                <div v-for="factor in factors" :key="factor.id" class="factor-card" :style="{ backgroundColor: getRankStyle(getRankLabel(factor)).cardBg }">
+                    <div class="factor-card-header">
                         <h4 class="factor-name">{{ factor.name }}</h4>
-                        <p class="factor-description">
-                            {{ getFactorDescription(factor) }} — The value for this hexagon is
-                            <strong>{{ formatValue(factor) }}</strong>, which indicates a
-                            <strong>{{ getRankLabel(factor) }}</strong> level compared to other areas in the dataset.
-                            {{ getFactorContext(factor) }}
-                        </p>
+                        <span class="factor-tag" :style="{ backgroundColor: getRankStyle(getRankLabel(factor)).tagBg, color: getRankStyle(getRankLabel(factor)).tagFg }">{{ getRankLabel(factor) }}</span>
                     </div>
+                    <p class="factor-variable">{{ factor.key || factor.valueField }}</p>
+                    <p class="factor-value">{{ formatValue(factor) }}<span class="factor-unit">{{ factor.unit }}</span></p>
+                    <div class="percentile-block">
+                        <div class="percentile-bar">
+                            <div class="percentile-fill" :style="{ width: getPercentile(factor) + '%', backgroundColor: getRankStyle(getRankLabel(factor)).tagBg }"></div>
+                            <div class="percentile-marker" :style="{ left: getPercentile(factor) + '%' }"></div>
+                        </div>
+                        <div class="percentile-labels">
+                            <span>0</span>
+                            <span>50</span>
+                            <span>100</span>
+                        </div>
+                        <p class="percentile-value">{{ getPercentileOrdinal(factor) }} percentile</p>
+                    </div>
+                    <p class="factor-description">
+                        <span class="factor-bullet" :style="{ backgroundColor: getRankStyle(getRankLabel(factor)).tagBg }"></span>
+                        This area shows a <strong>{{ getRankLabel(factor).toLowerCase() }}</strong> level compared to other areas. {{ getFactorShortDescription(factor) }}
+                    </p>
                 </div>
             </div>
 
             <div v-if="stats" class="data-section">
                 <h3 class="section-title">Demographic Information</h3>
-                <div class="info-content">
-                    <p class="description-text" v-if="properties.E_TOTPOP != null">
-                        The population in this area is approximately
-                        <strong>{{ formatNumber(properties.E_TOTPOP, 0) }} people</strong>.
-                        This population size places it
-                        {{ getPopulationContext() }} when compared to other hexagons in the dataset.
-                    </p>
-                    <p class="description-text" v-else>
-                        Population data for this hexagon is not available in the current dataset.
-                    </p>
-                </div>
+                <p class="description-text" v-if="properties.E_TOTPOP != null">
+                    Population in this area is approximately <strong>{{ formatNumber(properties.E_TOTPOP, 0) }} people</strong>
+                    ({{ getPopulationContext() }}).
+                </p>
+                <p class="description-text" v-else>
+                    Population data for this hexagon is not available.
+                </p>
             </div>
 
-            <div class="data-section">
+            <div class="data-section data-sources">
                 <h3 class="section-title">Data Sources</h3>
                 <p class="description-text">
-                    All data presented here is derived from the CHEL 2022 (Climate and Health Equity Index)
-                    dataset. Values are calculated based on standardized methodologies and may represent
-                    estimates or interpolations from source data. For more detailed information about
-                    data collection methods, please refer to the CHEL documentation.
+                    Data from the CHEL 2022 (Climate and Health Equity Index) dataset. Values may be estimates or interpolations.
                 </p>
             </div>
         </div>
@@ -218,6 +234,85 @@ function getPopulationContext() {
     if (pop < breaks[3]) return 'above average in population size'
     return 'among the largest population areas'
 }
+
+/* Colorblind-friendly: blues (theme) for favorable, amber/orange for moderate, no red-green only */
+const RANK_STYLES = {
+    'Very Low': { cardBg: '#e8f4fc', tagBg: '#1e4f86', tagFg: '#fff' },
+    'Low': { cardBg: '#e0f0fa', tagBg: '#5aa5d6', tagFg: '#fff' },
+    'Moderate': { cardBg: '#fef3c7', tagBg: '#d97706', tagFg: '#fff' },
+    'High': { cardBg: '#ffedd5', tagBg: '#ea580c', tagFg: '#fff' },
+    'Very High': { cardBg: '#fef2f2', tagBg: '#b91c1c', tagFg: '#fff' },
+    'N/A': { cardBg: '#f3f4f6', tagBg: '#6b7280', tagFg: '#fff' }
+}
+
+function getRankStyle(rank) {
+    return RANK_STYLES[rank] || RANK_STYLES['N/A']
+}
+
+function getRankTagLabel(rank) {
+    const labels = { 'Very Low': 'Favorable', 'Low': 'Favorable', 'Moderate': 'Moderate', 'High': 'Elevated', 'Very High': 'High' }
+    return labels[rank] || rank
+}
+
+function isFavorable(rank) {
+    return rank === 'Very Low' || rank === 'Low'
+}
+
+function getOverallRankClass() {
+    const rank = getOverallRank()
+    if (rank === 'Very Low' || rank === 'Low') return 'rating-favorable'
+    if (rank === 'Moderate') return 'rating-moderate'
+    return 'rating-elevated'
+}
+
+function getPercentile(factor) {
+    const fieldKey = factor.valueField || factor.key
+    const value = Number(properties.value[fieldKey])
+    if (value === null || value === undefined || Number.isNaN(value)) return 50
+    // EPL_PM, EPL_OZONE are already 0–1 in the dataset
+    if (fieldKey === 'EPL_PM' || fieldKey === 'EPL_OZONE') return Math.round((value || 0) * 100)
+    const factorStats = props.stats?.[fieldKey]
+    if (!factorStats || factorStats.min == null || factorStats.max == null) return 50
+    const { min, max, q20, q40, q60, q80 } = factorStats
+    if (value <= min) return 0
+    if (value >= max) return 100
+    // Linear interpolation between quantiles for a proper percentile estimate
+    const lerp = (v, a, b, pctLow, pctHigh) => {
+        if (b === a) return (pctLow + pctHigh) / 2
+        const t = (v - a) / (b - a)
+        return pctLow + t * (pctHigh - pctLow)
+    }
+    let pct
+    if (value <= q20) pct = lerp(value, min, q20, 0, 20)
+    else if (value <= q40) pct = lerp(value, q20, q40, 20, 40)
+    else if (value <= q60) pct = lerp(value, q40, q60, 40, 60)
+    else if (value <= q80) pct = lerp(value, q60, q80, 60, 80)
+    else pct = lerp(value, q80, max, 80, 100)
+    return Math.min(100, Math.max(0, Math.round(pct)))
+}
+
+function getPercentileOrdinal(factor) {
+    const p = getPercentile(factor)
+    if (p >= 11 && p <= 13) return p + 'th'
+    const d = p % 10
+    if (d === 1) return p + 'st'
+    if (d === 2) return p + 'nd'
+    if (d === 3) return p + 'rd'
+    return p + 'th'
+}
+
+function getFactorShortDescription(factor) {
+    const descriptions = {
+        pm25: 'Fine particulate matter (PM2.5) concentration. Lower values indicate better air quality.',
+        asthma: 'Asthma prevalence in the population.',
+        pm25pct: 'Percentile ranking of air pollution.',
+        ozone: 'Ozone concentration.',
+        ozonepct: 'Percentile ranking of ozone.',
+        svm: 'Social Vulnerability Index.',
+        pop: 'Total population in this hex.'
+    }
+    return descriptions[factor.id] || `${factor.name} (CHEL 2022 dataset).`
+}
 </script>
 
 <style scoped>
@@ -275,20 +370,46 @@ function getPopulationContext() {
     }
 }
 
+/* Header: theme blue, matches app primary */
 .sidebar-header {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 20px 24px;
-    border-bottom: 1px solid #e5e7eb;
     flex-shrink: 0;
+    background: #1e4f86;
+    color: #fff;
+    padding: 20px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
-.sidebar-title {
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.header-title-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.location-pin {
+    display: flex;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.location-title {
     margin: 0;
-    font-size: 20px;
-    font-weight: 600;
-    color: #111827;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+}
+
+.location-subtitle {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .close-button {
@@ -299,62 +420,103 @@ function getPopulationContext() {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #6b7280;
+    color: rgba(255, 255, 255, 0.9);
     transition: color 0.2s;
 }
 
 .close-button:hover {
-    color: #111827;
+    color: #fff;
+}
+
+.overall-rating-card {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.overall-rating-card.rating-favorable {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.rating-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.rating-definition {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 6px 0 10px 0;
+    line-height: 1.4;
+}
+
+.rating-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.rating-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.rating-tag {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.rating-check {
+    color: #86efac;
+    display: flex;
+    margin-left: auto;
 }
 
 .sidebar-content {
     flex: 1;
     overflow-y: auto;
     padding: 24px;
+    background: #fff;
 }
 
-.location-info {
-    margin-bottom: 32px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid #e5e7eb;
+.intro-text {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 24px 0;
+    line-height: 1.5;
 }
 
 .data-section {
-    margin-bottom: 32px;
+    margin-bottom: 28px;
+}
+
+.data-sources .description-text {
+    margin-bottom: 0;
 }
 
 .section-title {
     font-size: 14px;
     font-weight: 600;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    color: #374151;
     margin: 0 0 16px 0;
-}
-
-.location-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #111827;
-    margin: 0 0 12px 0;
-}
-
-.location-description {
-    font-size: 14px;
-    line-height: 1.6;
-    color: #6b7280;
-    margin: 0;
-}
-
-.text-content {
-    margin-bottom: 8px;
+    letter-spacing: 0.02em;
 }
 
 .description-text {
     font-size: 14px;
-    line-height: 1.7;
+    line-height: 1.6;
     color: #374151;
-    margin: 0 0 16px 0;
+    margin: 0 0 12px 0;
 }
 
 .description-text:last-child {
@@ -369,31 +531,117 @@ function getPopulationContext() {
 .factors-list {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
 }
 
-.factor-item {
-    padding-bottom: 24px;
-    border-bottom: 1px solid #e5e7eb;
+.factor-card {
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.factor-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+.factor-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
 }
 
 .factor-name {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     color: #111827;
-    margin: 0 0 8px 0;
+    margin: 0;
+}
+
+.factor-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.factor-variable {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 0 0 4px 0;
+}
+
+.factor-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 12px 0;
+}
+
+.factor-unit {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    margin-left: 4px;
+}
+
+.percentile-block {
+    margin-bottom: 12px;
+}
+
+.percentile-bar {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 4px;
+}
+
+.percentile-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.25s ease;
+}
+
+.percentile-marker {
+    position: absolute;
+    top: -2px;
+    width: 2px;
+    height: 12px;
+    background: #374151;
+    border-radius: 1px;
+    transform: translateX(-50%);
+}
+
+.percentile-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #9ca3af;
+    margin-bottom: 2px;
+}
+
+.percentile-value {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 0;
 }
 
 .factor-description {
-    font-size: 14px;
-    line-height: 1.7;
+    font-size: 13px;
+    line-height: 1.55;
     color: #374151;
     margin: 0;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.factor-bullet {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 6px;
 }
 
 .factor-description strong {
