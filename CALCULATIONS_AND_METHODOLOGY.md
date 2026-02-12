@@ -4,19 +4,27 @@ This document describes how all values, scales, filters, and ratings are calcula
 
 ---
 
+## 0. Units: not in the dataset, not added in the app
+
+The GeoJSON and the CHEL2022.gpkg file only store numbers (e.g. `"EP_ASTHMA": 10.5`). **No units are stored or documented in the data.** This project does not include or link to an official CHEL data dictionary.
+
+We **do not display units** (such as %, μg/m³, ppm, “people”, or “index”) in the app, because we cannot cite them from the dataset. The factor catalog uses empty `unit` values; the legend and cards show only the numeric scale and factor name. If you obtain CHEL documentation that defines units for each field, you can add those units to the catalog and display them.
+
+---
+
 ## 1. Data source and variables
 
 The map uses one GeoJSON dataset (e.g. `chel2022.geojson`) with one value per hex for each variable. Only variables that have numeric values and can be summarized are shown.
 
-| Display name              | Dataset field | Description                          | Unit in data / legend   |
-|---------------------------|---------------|--------------------------------------|--------------------------|
-| Air Pollution (PM2.5)     | E_PM          | Fine particulate matter concentration| μg/m³                    |
-| Asthma Rates              | EP_ASTHMA     | Asthma prevalence                    | %                        |
-| Air Pollution Percentile  | EPL_PM        | Percentile of air pollution (0–1)   | shown as 0–100% in legend|
-| Ozone                     | E_OZONE       | Ground-level ozone concentration     | ppm                      |
-| Ozone Percentile          | EPL_OZONE     | Percentile of ozone (0–1)            | shown as 0–100% in legend|
-| Social Vulnerability      | SPL_SVM       | Social Vulnerability Index           | index (no unit in data)  |
-| Population                | E_TOTPOP      | Total population in hex              | people (legend only)      |
+| Display name              | Dataset field | Description (from factor names only; no units in data) |
+|---------------------------|---------------|--------------------------------------------------------|
+| Air Pollution (PM2.5)     | E_PM          | Fine particulate matter (PM2.5)                       |
+| Asthma Rates              | EP_ASTHMA     | Asthma-related measure                                |
+| Air Pollution Percentile  | EPL_PM        | Air pollution percentile (0–1 in data; shown as 0–100)|
+| Ozone                     | E_OZONE       | Ozone measure                                         |
+| Ozone Percentile          | EPL_OZONE     | Ozone percentile (0–1 in data; shown as 0–100)         |
+| Social Vulnerability      | SPL_SVM       | Social vulnerability index                             |
+| Population                | E_TOTPOP      | Total population count                                 |
 
 ---
 
@@ -65,14 +73,13 @@ So the scale is **relative to the dataset**: e.g. “Low” means in the 20th–
 
 ## 3. How the legend numbers are displayed
 
-The **same** breakpoints (q20, q40, q60, q80) are shown in the legend; only the formatting changes by variable type:
+The **same** breakpoints (q20, q40, q60, q80) are shown in the legend; only the number formatting changes by variable type:
 
-- **Population (E_TOTPOP):** Breakpoints are rounded to **integers** and formatted with commas (e.g. 20,667). The legend unit is **“people”**.
-- **Ozone Percentile / Air Pollution Percentile (EPL_OZONE, EPL_PM):** Values are on a 0–1 scale in the data. They are shown as **0–100** (e.g. 20, 40, 60, 80) with unit **“%”** in the legend.
-- **Social Vulnerability (SPL_SVM):** Breakpoints shown as-is; legend unit is **“index”**.
-- **All others (e.g. Asthma %, PM2.5, Ozone ppm):** Breakpoints shown with one decimal place when needed; unit comes from the catalog (e.g. %, μg/m³, ppm).
+- **Population (E_TOTPOP):** Breakpoints are rounded to **integers** and formatted with commas (e.g. 20,667).
+- **Ozone Percentile / Air Pollution Percentile (EPL_OZONE, EPL_PM):** Values are on a 0–1 scale in the data. They are shown as **0–100** (e.g. 20, 40, 60, 80).
+- **All others:** Breakpoints shown with one decimal place when needed.
 
-The note under the scale explains what the numbers are (e.g. “Values in %” or “Values for [variable name]”).
+No units are shown in the legend (dataset does not provide units). The note under the scale can show the factor name only.
 
 ---
 

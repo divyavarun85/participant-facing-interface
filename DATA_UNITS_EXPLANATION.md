@@ -2,7 +2,9 @@
 
 ## Overview
 
-**Yes, all the data values come from your CHEL 2022 GeoJSON file** (`chel2022_wgs84.geojson`). The units are defined in the code to match how the CHEL dataset stores the data.
+**Yes, all the data values come from your CHEL 2022 GeoJSON file** (`chel2022_wgs84.geojson`). **The dataset and the CHEL2022.gpkg file do not specify units for any measure.** The app does not display units (%, μg/m³, ppm, etc.) because we cannot cite them from the data.
+
+The section below describes **interpretations that are sometimes used** for these fields (e.g. in other CHEL documentation or literature). Do not treat these as coming from the dataset until you have an official CHEL data dictionary or codebook.
 
 ## Variable Units and Their Meanings
 

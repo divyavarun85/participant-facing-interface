@@ -198,7 +198,7 @@ const catalog = [
         palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525'] },
     { id: 'ozonepct', name: 'Ozone Percentile', unit: '', key: 'EPL_OZONE',
         palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525'] },
-    { id: 'svm', name: 'Social Vulnerability', unit: '', key: 'SPL_SVM',
+    { id: 'svm', name: 'Social Vulnerability', unit: 'index', key: 'SPL_SVM',
         palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525'] },
     { id: 'pop', name: 'Population', unit: '', key: 'E_TOTPOP',
         palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525'] },
