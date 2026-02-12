@@ -61,8 +61,11 @@
                         <p class="percentile-value">{{ getPercentileOrdinal(factor) }} percentile</p>
                     </div>
                     <p class="factor-description">
-                        <span class="factor-bullet" :style="{ backgroundColor: getRankStyle(getRankLabel(factor)).tagBg }"></span>
-                        This area shows a <strong>{{ getRankLabel(factor).toLowerCase() }}</strong> level compared to other areas. {{ getFactorShortDescription(factor) }}
+                        <span class="factor-description-line1">
+                            <span class="factor-bullet" :style="{ backgroundColor: getRankStyle(getRankLabel(factor)).tagBg }"></span>
+                            This area shows a <strong>{{ getRankLabel(factor).toLowerCase() }}</strong> level compared to other areas.
+                        </span>
+                        <span class="factor-description-line2">{{ getFactorShortDescription(factor) }}</span>
                     </p>
                 </div>
             </div>
@@ -500,6 +503,10 @@ function getFactorShortDescription(factor) {
     margin-bottom: 28px;
 }
 
+.data-sources {
+    margin-top: 24px;
+}
+
 .data-sources .description-text {
     margin-bottom: 0;
 }
@@ -630,10 +637,13 @@ function getFactorShortDescription(factor) {
     font-size: 13px;
     line-height: 1.55;
     color: #374151;
-    margin: 0;
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
+}
+
+.factor-description-line1 {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .factor-bullet {
