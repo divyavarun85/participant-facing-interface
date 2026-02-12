@@ -186,17 +186,17 @@ watch(
     }
 )
 
-/** factor catalog (labels + mapping to real CHEL GeoJSON property names) */
+/** factor catalog: raw measure then its percentile (where applicable), then health/vulnerability, then context */
 const catalog = [
     { id: 'pm25', name: 'Air Pollution (PM2.5)', unit: 'μg/m³', key: 'E_PM',
-        palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525'] },
-    { id: 'asthma', name: 'Asthma Rates', unit: '%', key: 'EP_ASTHMA',
         palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525'] },
     { id: 'pm25pct', name: 'Air Pollution Percentile', unit: '', key: 'EPL_PM',
         palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525'] },
     { id: 'ozone', name: 'Ozone', unit: 'ppm', key: 'E_OZONE',
         palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525'] },
     { id: 'ozonepct', name: 'Ozone Percentile', unit: '', key: 'EPL_OZONE',
+        palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525'] },
+    { id: 'asthma', name: 'Asthma Rates', unit: '%', key: 'EP_ASTHMA',
         palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525'] },
     { id: 'svm', name: 'Social Vulnerability', unit: 'index', key: 'SPL_SVM',
         palette: ['#f5f5f5', '#cccccc', '#969696', '#636363', '#252525'] },
