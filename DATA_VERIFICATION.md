@@ -34,7 +34,7 @@ If North Carolina shows as "high" or "very high," it means:
 - These are calculated from your dataset's percentiles
 
 ### 3. Check the Data Source
-- You're using: **CHEL 2022** (Climate and Health Explorer) data
+- You're using: **CHEL 2022** (Climate and Health Equity Index) data—**2022 is the data reference year**
 - This is real research data from environmental health studies
 - File: `chel2022_wgs84.geojson`
 

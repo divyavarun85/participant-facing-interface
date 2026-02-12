@@ -90,5 +90,5 @@ From `chel2022.geojson`:
 ✅ **GeoJSON file** = Your data source (not "cell data")  
 ✅ **Code** = Defines how to display and label the data
 
-The CHEL (Climate and Health Explorer) dataset is a research dataset that provides environmental and health data aggregated to hexagon grids across the US.
+The CHEL (Climate and Health Equity Index) dataset is a research dataset that provides environmental and health data aggregated to hexagon grids. **CHEL 2022** uses **2022 as the data reference year** (indicators are for 2022 unless otherwise documented).
 

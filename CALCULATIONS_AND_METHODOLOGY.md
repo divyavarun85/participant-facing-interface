@@ -1,6 +1,6 @@
 # Environmental Map: Calculations and Methodology
 
-This document describes how all values, scales, filters, and ratings are calculated in the application. Data is from the **CHEL 2022** (Climate and Health Equity Index) dataset.
+This document describes how all values, scales, filters, and ratings are calculated in the application. Data is from the **CHEL 2022** (Climate and Health Equity Index) dataset. **“2022” is the data reference year**—i.e. the indicators are for the 2022 reference year unless the dataset documentation states otherwise.
 
 ---
 
