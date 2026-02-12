@@ -236,9 +236,12 @@ const legendBins = computed(() => {
         return []
     }
     const isPopulation = valueField === 'E_TOTPOP'
-    const fmt = n => isPopulation
-        ? Math.round(n).toLocaleString('en-US')
-        : (Math.abs(n) % 1 === 0 ? n : +n.toFixed(1))
+    const isPercentile01 = valueField === 'EPL_OZONE' || valueField === 'EPL_PM' // 0–1 scale, show as %
+    const fmt = n => {
+        if (isPopulation) return Math.round(n).toLocaleString('en-US')
+        if (isPercentile01) return Math.round(n * 100) // 0.2 → 20, 0.4 → 40
+        return (Math.abs(n) % 1 === 0 ? n : +n.toFixed(1))
+    }
     const bins = []
     bins.push({ color: colors[0], range: `≤ ${fmt(breaks[0])}`, label: 'Very Low' })
     for (let i = 1; i < breaks.length; i++) {

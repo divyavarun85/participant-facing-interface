@@ -156,10 +156,13 @@ const legendTooltipStyle = computed(() => ({
   left: `${legendTooltipPosition.value.left}px`
 }))
 
-/** Show "people" in legend only when Population is selected; factor cards keep their own unit (no "people" there) */
-const legendUnit = computed(() =>
-  props.activeFactorName === 'Population' ? 'people' : props.unit
-)
+/** Legend-only units: "people", "index", "%" for percentile factors; factor cards keep catalog units */
+const legendUnit = computed(() => {
+  if (props.activeFactorName === 'Population') return 'people'
+  if (props.activeFactorName === 'Social Vulnerability') return 'index'
+  if (props.activeFactorName === 'Ozone Percentile' || props.activeFactorName === 'Air Pollution Percentile') return '%'
+  return props.unit
+})
 
 function updateLegendTooltipPosition() {
   nextTick(() => {
