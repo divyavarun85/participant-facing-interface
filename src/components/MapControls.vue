@@ -38,16 +38,23 @@
         </button>
       </div>
       <transition name="fade">
-        <p v-if="pinErrorToDisplay" class="feedback feedback-error">{{ pinErrorToDisplay }}</p>
+        <p v-if="pinErrorToDisplay" class="feedback feedback-error" role="alert">
+          <span class="feedback-error-icon" aria-hidden="true">!</span>
+          {{ pinErrorToDisplay }}
+        </p>
       </transition>
     </section>
     <section class="panel card">
       <label class="field-label">Environmental Factor</label>
       <div class="variable-list" role="list">
-        <button v-for="factor in factors" :key="factor.id" type="button" class="variable-item"
+        <div v-for="factor in factors" :key="factor.id" class="variable-item"
           :class="{ 'variable-item--selected': factor.id === selectedFactor }"
-          @click="$emit('factor-change', factor.id)" :aria-label="`Select ${factor.name}`"
-          :aria-pressed="factor.id === selectedFactor">
+          role="button" tabindex="0"
+          :aria-label="`Select ${factor.name}`"
+          :aria-pressed="factor.id === selectedFactor ? 'true' : 'false'"
+          @click="$emit('factor-change', factor.id)"
+          @keydown.enter.prevent="$emit('factor-change', factor.id)"
+          @keydown.space.prevent="$emit('factor-change', factor.id)">
           <div class="variable-preview">
             <span v-for="(color, idx) in factor.colorScale" :key="idx" class="variable-preview-swatch"
               :style="{ backgroundColor: color }"></span>
@@ -58,12 +65,17 @@
               <span class="variable-unit" v-if="factor.unit">{{ factor.unit }}</span>
             </div>
             <p class="variable-description">{{ getFactorShortDescription(factor.id) }}</p>
+            <a v-if="getLearnMoreUrl(factor.id)" class="learn-more-link" :href="getLearnMoreUrl(factor.id)"
+              target="_blank" rel="noopener noreferrer" @click.stop>
+              <span class="learn-more-icon" aria-hidden="true">?</span>
+              What is this?
+            </a>
             <div v-if="factor.id === selectedFactor" class="variable-status">
               <span class="status-indicator">Currently displaying on map</span>
             </div>
           </div>
           <span v-if="factor.id === selectedFactor" class="variable-checkmark">✓</span>
-        </button>
+        </div>
       </div>
 
       <div v-if="legendBins.length > 0" class="legend-ribbon" :style="{ background: ribbonGradient }"
@@ -180,6 +192,14 @@ function fmt(n) { return (typeof n === 'number' && isFinite(n)) ? (Math.abs(n) %
 function clearFilter() {
   selectedFilterLabel.value = ''
   emit('range-change', null)
+}
+
+function getLearnMoreUrl(factorId) {
+  const urls = {
+    'svm': 'https://www.atsdr.cdc.gov/place-health/php/svi/index.html',
+    'ozone': 'https://www.epa.gov/ground-level-ozone-pollution'
+  }
+  return urls[factorId] || null
 }
 
 function getFactorShortDescription(factorId) {
@@ -395,6 +415,37 @@ function getFactorShortDescription(factorId) {
   line-height: 1.4;
 }
 
+.learn-more-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #2563eb;
+  text-decoration: none;
+  margin-top: 4px;
+  transition: color 0.2s ease;
+}
+
+.learn-more-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.learn-more-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .variable-status {
   margin-top: 2px;
 }
@@ -594,7 +645,25 @@ function getFactorShortDescription(factorId) {
 }
 
 .feedback-error {
-  color: #dc2626;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #b91c1c;
+}
+
+.feedback-error-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #b91c1c;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .range-row {

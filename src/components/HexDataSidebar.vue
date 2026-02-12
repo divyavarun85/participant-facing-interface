@@ -477,7 +477,7 @@ function getFactorShortDescription(factor) {
 }
 
 .rating-check {
-    color: #86efac;
+    color: #93c5fd;
     display: flex;
     margin-left: auto;
 }

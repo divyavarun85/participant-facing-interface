@@ -307,7 +307,7 @@ function updateSearchPin() {
       el.className = 'search-pin-marker'
       el.style.width = '24px'
       el.style.height = '32px'
-      el.style.backgroundImage = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'32\' viewBox=\'0 0 24 32\'%3E%3Cpath fill=\'%23dc2626\' d=\'M12 0C7.58 0 4 3.58 4 8c0 6.5 8 16 8 16s8-9.5 8-16c0-4.42-3.58-8-8-8zm0 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z\'/%3E%3C/svg%3E")'
+      el.style.backgroundImage = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'24\' height=\'32\' viewBox=\'0 0 24 32\'%3E%3Cpath fill=\'%231e4f86\' d=\'M12 0C7.58 0 4 3.58 4 8c0 6.5 8 16 8 16s8-9.5 8-16c0-4.42-3.58-8-8-8zm0 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z\'/%3E%3C/svg%3E")'
       el.style.backgroundSize = 'contain'
       el.style.backgroundRepeat = 'no-repeat'
       el.style.backgroundPosition = 'center'
