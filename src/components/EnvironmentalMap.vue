@@ -30,7 +30,7 @@
             </button>
             <div v-if="sidebarOpen" class="sidebar-overlay" @click="sidebarOpen = false"></div>
             <MapControls :class="{ 'sidebar-open': sidebarOpen }" :factors="factors" :selected-factor="selectedFactor"
-                :legend-bins="legendBins" :palette="active.colors" :selected-range="currentRange"
+                :legend-bins="legendBins" :palette="active.colors" :unit="active.unit" :selected-range="currentRange"
                 :pin-error-message="pinErrorMessage" :pin-loading="pinLoading" @factor-change="onFactorChange"
                 @range-change="onRangeChange" @toggle-overlay="overlayOn = $event" @pin-search="handlePinSearch"
                 @close-sidebar="sidebarOpen = false" />
@@ -621,8 +621,9 @@ async function handlePinSearch(queryInput) {
 }
 
 .map-wrapper {
-    flex: 1;
     position: relative;
+    z-index: 1;
+    flex: 1;
     min-height: 0;
     width: 100%;
 }

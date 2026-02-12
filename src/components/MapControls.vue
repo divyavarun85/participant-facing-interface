@@ -78,16 +78,35 @@
         </div>
       </div>
 
+      <div v-if="legendBins.length > 0" class="legend-header">
+        <span class="legend-title">Scale</span>
+        <span class="legend-info-wrap">
+          <button ref="legendInfoBtnRef" type="button" class="legend-info-btn" aria-label="How is the scale calculated?"
+            :title="legendTooltipText" :aria-expanded="showLegendTooltip" aria-haspopup="true"
+            @click.prevent.stop="toggleLegendTooltip">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 16v-4M12 8h.01"></path>
+            </svg>
+          </button>
+          <Teleport to="body">
+            <div v-if="showLegendTooltip" class="legend-tooltip-portal" role="tooltip"
+              :style="legendTooltipStyle" @click.stop>
+              {{ legendTooltipText }}
+            </div>
+          </Teleport>
+        </span>
+      </div>
       <div v-if="legendBins.length > 0" class="legend-ribbon" :style="{ background: ribbonGradient }"
         aria-hidden="true"></div>
       <div v-if="legendBins.length > 0" class="legend-scale" role="list">
         <button v-for="(bin, i) in legendBins" :key="`${bin.range}-${i}`" class="legend-item" type="button"
-          :aria-label="`Filter to ${bin.label || 'this level'}`" @click="onLegendClick(i)">
+          :aria-label="`Filter to ${bin.label || 'this level'}: ${bin.range}${unit ? ' ' + unit : ''}`" @click="onLegendClick(i)">
           <span class="legend-swatch" :style="{ backgroundColor: bin.color }" />
           <span class="legend-text">
             <span class="legend-range">{{ bin.label }}</span>
+            <span class="legend-brackets">{{ bin.range }}{{ unit ? ' ' + unit : '' }}</span>
           </span>
-
         </button>
       </div>
 
@@ -102,7 +121,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
   factors: { type: Array, required: true },
@@ -119,9 +138,53 @@ const props = defineProps({
 const emit = defineEmits(['factor-change', 'range-change', 'legend-bin-click', 'toggle-overlay', 'pin-search', 'close-sidebar'])
 
 const showHelp = ref(false)
+const showLegendTooltip = ref(false)
+const legendInfoBtnRef = ref(null)
+const legendTooltipPosition = ref({ top: 0, left: 0 })
 const pinQuery = ref('')
 const pinErrorLocal = ref('')
+const legendTooltipText = 'Levels are based on the distribution of values across all areas in the dataset. Each band represents roughly 20% of areas: Very Low (lowest 20%), Low (20–40%), Moderate (40–60%), High (60–80%), Very High (top 20%). Breakpoints use the 20th, 40th, 60th, and 80th percentiles.'
 const pinErrorToDisplay = computed(() => props.pinErrorMessage || pinErrorLocal.value)
+
+const legendTooltipStyle = computed(() => ({
+  top: `${legendTooltipPosition.value.top}px`,
+  left: `${legendTooltipPosition.value.left}px`
+}))
+
+function updateLegendTooltipPosition() {
+  nextTick(() => {
+    const el = legendInfoBtnRef.value
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const tooltipHeight = 120
+    const gap = 8
+    legendTooltipPosition.value = {
+      top: rect.top - tooltipHeight - gap,
+      left: Math.max(12, Math.min(rect.left, document.documentElement.clientWidth - 272))
+    }
+  })
+}
+
+function toggleLegendTooltip() {
+  showLegendTooltip.value = !showLegendTooltip.value
+  if (showLegendTooltip.value) updateLegendTooltipPosition()
+}
+
+function closeLegendTooltipOnClickOutside(e) {
+  if (!showLegendTooltip.value) return
+  const btn = legendInfoBtnRef.value
+  const portal = document.querySelector('.legend-tooltip-portal')
+  if (btn && !btn.contains(e.target) && portal && !portal.contains(e.target)) {
+    showLegendTooltip.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', closeLegendTooltipOnClickOutside)
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('click', closeLegendTooltipOnClickOutside)
+})
 const selectedFilterLabel = ref('')
 
 const selectedFactorData = computed(() =>
@@ -218,6 +281,8 @@ function getFactorShortDescription(factorId) {
 
 <style scoped>
 .map-controls {
+  position: relative;
+  z-index: 10;
   width: 340px;
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
@@ -499,6 +564,59 @@ function getFactorShortDescription(factorId) {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+.legend-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.legend-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.legend-info-wrap {
+  position: relative;
+}
+
+.legend-info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: color 0.2s, background 0.2s;
+}
+
+.legend-info-btn:hover {
+  color: #2563eb;
+  background: #eef2ff;
+}
+
+.legend-tooltip-portal {
+  position: fixed;
+  z-index: 99999;
+  width: 260px;
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #374151;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  pointer-events: auto;
+}
+
 .legend-ribbon {
   height: 12px;
   border-radius: 999px;
@@ -542,6 +660,8 @@ function getFactorShortDescription(factorId) {
 .legend-text {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
   font-size: 12px;
   color: #1f2937;
   flex: 1;
@@ -550,6 +670,11 @@ function getFactorShortDescription(factorId) {
 
 .legend-range {
   font-weight: 500;
+}
+
+.legend-brackets {
+  font-size: 11px;
+  color: #64748b;
 }
 
 .legend-sub {
