@@ -9,17 +9,9 @@
                 </span>
                 <span class="logo-tagline">Research Program</span>
             </div>
-            <nav class="app-header__nav">
-                <span class="nav-link">Home</span>
-                <span class="nav-link">To Do</span>
-                <span class="nav-link">My Data</span>
-                <span class="nav-link">Partner Studies</span>
-                <span class="nav-link">Support</span>
-                <span class="nav-link nav-link--highlight">Environmental Map</span>
-            </nav>
-            <div class="app-header__user">
-                <div class="user-avatar">DV</div>
-                <span class="user-name">Divya Varun</span>
+            <div class="app-header__center">
+                <span class="app-header__title">Environmental Map</span>
+                <span class="app-header__badge">Prototype</span>
             </div>
         </header>
         <div class="environmental-map-container">
@@ -559,58 +551,27 @@ async function handlePinSearch(queryInput) {
     font-weight: 900;
 }
 
-.app-header__nav {
-    display: flex;
-    gap: 24px;
-}
-
-.nav-link {
-    font-size: 13px;
-    color: #1e4f86;
-    font-weight: 500;
-    cursor: default;
-}
-
-.nav-link--highlight {
-    color: #1e4f86;
-    font-weight: 600;
-    position: relative;
-    padding-bottom: 4px;
-}
-
-.nav-link--highlight::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 2px;
-    background: #1e4f86;
-}
-
-.app-header__user {
+.app-header__center {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.user-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: #94a3b8;
-    color: #ffffff;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+.app-header__title {
+    font-size: 15px;
     font-weight: 600;
-    font-size: 13px;
+    color: #1e4f86;
 }
 
-.user-name {
-    font-size: 13px;
-    color: #1f2937;
-    font-weight: 500;
+.app-header__badge {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+    background: #e2e8f0;
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 
 .environmental-map-container {
@@ -694,12 +655,8 @@ async function handlePinSearch(queryInput) {
         padding-left: 60px;
     }
 
-    .app-header__nav {
-        display: none;
-    }
-
-    .user-name {
-        display: none;
+    .app-header__title {
+        font-size: 13px;
     }
 
     .logo-wordmark {
