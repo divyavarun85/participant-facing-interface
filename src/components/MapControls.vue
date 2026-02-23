@@ -1,31 +1,14 @@
 <template>
   <aside class="map-controls">
     <header class="panel-header">
-      <div>
-        <h2>Public Facing Interface</h2>
-      </div>
       <div class="header-actions">
         <button class="mobile-close-btn" @click="$emit('close-sidebar')" aria-label="Close sidebar">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
         </button>
-        <button class="help-toggle" @click="showHelp = !showHelp" :aria-label="showHelp ? 'Close help' : 'Show help'">
-          {{ showHelp ? '✕' : '?' }}
-        </button>
       </div>
     </header>
-
-    <transition name="collapse">
-      <section v-if="showHelp" class="panel card card-muted">
-        <h3>Quick Tips</h3>
-        <ul>
-          <li>Enter a ZIP code or address to zoom directly to that area.</li>
-          <li>Click an environmental factor below to swap between indicators on the map.</li>
-          <li>Select a factor to see how the map colors correspond to value ranges.</li>
-        </ul>
-      </section>
-    </transition>
     <section class="panel card">
       <label class="field-label" for="pin-input">Find Your Location</label>
       <div class="pin-input-row">
@@ -100,12 +83,27 @@
     </section>
     </div>
     <div class="sidebar-footer">
-      <button type="button" class="btn-download" @click="$emit('download')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-        </svg>
-        Download Data
-      </button>
+      <div class="sidebar-footer-buttons">
+        <button type="button" class="btn-download" @click="$emit('download')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          Download Data
+        </button>
+        <button type="button" class="btn-how-to" @click="showHelp = !showHelp" :aria-expanded="showHelp">
+          How to use this app
+        </button>
+      </div>
+      <transition name="collapse">
+        <section v-if="showHelp" class="help-panel card card-muted">
+          <h3>Quick Tips</h3>
+          <ul>
+            <li>Enter a ZIP code or address to zoom directly to that area.</li>
+            <li>Click an environmental factor below to swap between indicators on the map.</li>
+            <li>Select a factor to see how the map colors correspond to value ranges.</li>
+          </ul>
+        </section>
+      </transition>
     </div>
   </aside>
 </template>
@@ -262,6 +260,15 @@ function getFactorShortDescription(factorId) {
   padding-top: 12px;
   border-top: 1px solid #e2e8f0;
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-footer-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
 }
 
 .btn-download {
@@ -269,7 +276,7 @@ function getFactorShortDescription(factorId) {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: 100%;
+  flex: 1;
   padding: 10px 16px;
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #fff;
@@ -286,10 +293,39 @@ function getFactorShortDescription(factorId) {
   transform: translateY(-1px);
 }
 
+.btn-how-to {
+  flex: 1;
+  padding: 10px 16px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-how-to:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.help-panel {
+  padding: 14px 16px;
+}
+
+.help-panel h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
 .panel-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: flex-end;
+  align-items: center;
   margin-bottom: 4px;
 }
 

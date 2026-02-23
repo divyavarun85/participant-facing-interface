@@ -10,15 +10,20 @@
                 <span class="logo-tagline">Research Program</span>
             </div>
             <div class="app-header__center">
-                <span class="app-header__title">Environmental Map</span>
+                <div class="app-header__titles">
+                    <span class="app-header__title">Public Facing Interface</span>
+                    <span class="app-header__subtitle">Environmental Map</span>
+                </div>
+            </div>
+            <div class="app-header__right">
                 <div class="app-header__prototype-wrap">
-                    <span class="app-header__badge">Prototype</span>
+                    <span class="app-header__badge">PROTOTYPE</span>
                     <button type="button" class="app-header__info-btn" aria-label="Prototype notice"
                         @mouseenter="showPrototypeNotice = true" @mouseleave="showPrototypeNotice = false"
                         @focus="showPrototypeNotice = true" @blur="showPrototypeNotice = false">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M12 16v-4M12 8h.01"></path>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
                         </svg>
                     </button>
                     <div v-show="showPrototypeNotice" class="app-header__prototype-tooltip" role="tooltip">
@@ -608,13 +613,25 @@ async function handlePinSearch(queryInput) {
 }
 
 .app-header {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
     padding: 16px 32px;
     background: #ffffff;
     border-top: 1px solid #e5e7eb;
     border-bottom: 1px solid #e5e7eb;
+}
+
+.app-header__logo {
+    justify-self: start;
+}
+
+.app-header__center {
+    justify-self: center;
+}
+
+.app-header__right {
+    justify-self: end;
 }
 
 .app-header__logo {
@@ -657,13 +674,24 @@ async function handlePinSearch(queryInput) {
 .app-header__center {
     display: flex;
     align-items: center;
-    gap: 10px;
+}
+
+.app-header__titles {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
 }
 
 .app-header__title {
-    font-size: 15px;
+    font-size: 20px;
     font-weight: 600;
     color: #1e4f86;
+}
+
+.app-header__subtitle {
+    font-size: 14px;
+    color: #64748b;
 }
 
 .app-header__prototype-wrap {
@@ -674,34 +702,34 @@ async function handlePinSearch(queryInput) {
 }
 
 .app-header__badge {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
     letter-spacing: 0.04em;
-    color: #64748b;
-    background: #e2e8f0;
-    padding: 4px 8px;
-    border-radius: 4px;
+    color: #1e4f86;
+    background: #dbeafe;
+    border: 1.5px solid #3b82f6;
+    padding: 6px 12px;
+    border-radius: 8px;
 }
 
 .app-header__info-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
+    width: 36px;
+    height: 36px;
     padding: 0;
     border: none;
-    border-radius: 50%;
-    background: #e2e8f0;
-    color: #64748b;
+    border-radius: 8px;
+    background: transparent;
+    color: #475569;
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
 }
 
 .app-header__info-btn:hover {
-    background: #cbd5e1;
-    color: #475569;
+    background: #e2e8f0;
+    color: #1e4f86;
 }
 
 .app-header__prototype-tooltip {
