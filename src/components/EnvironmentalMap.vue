@@ -498,9 +498,11 @@ async function handlePinSearch(queryInput) {
 
 <style scoped>
 .environmental-map-shell {
+    height: 100vh;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     background: #f1f5f9;
 }
 
@@ -578,7 +580,7 @@ async function handlePinSearch(queryInput) {
     flex: 1;
     display: flex;
     min-height: 0;
-    height: calc(100vh - 80px);
+    overflow: hidden;
 }
 
 @media (max-width: 768px) {

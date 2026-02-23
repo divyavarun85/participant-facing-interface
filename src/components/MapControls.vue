@@ -297,6 +297,8 @@ function getFactorShortDescription(factorId) {
   position: relative;
   z-index: 10;
   width: 340px;
+  min-height: 0;
+  flex-shrink: 0;
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
   overflow-y: auto;
