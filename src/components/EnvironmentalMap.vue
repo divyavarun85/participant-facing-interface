@@ -33,7 +33,7 @@
                     :zoom="mapZoom" :filter="layerFilter" :hoverHighlight="true" :zoomOnClick="true"
                     :zoomOnClickTarget="8" :statesUrl="statesGeoUrl" :showStateBorders="true"
                     :selectedHexIds="selectedHexIds" :selectedHexColor="'#1e4f86'" :selectedHexWidth="3"
-                    :tooltipFields="tooltipFields" :searchPinLocation="searchPinLocation" @hex-click="handleHexClick" />
+                    :tooltipFields="tooltipFields" :tooltipLegendConfig="tooltipLegendConfig" :searchPinLocation="searchPinLocation" @hex-click="handleHexClick" />
 
                 <!-- Right Sidebar for Hex Data -->
                 <HexDataSidebar v-if="selectedHexFeature" :feature="selectedHexFeature" :factors="factors"
@@ -301,6 +301,31 @@ function formatNumber(value, opts = {}) {
     const formatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1, ...opts })
     return formatter.format(value)
 }
+
+/** config for tooltip mini legend (min, max, palette, valueField) when factor selected */
+const tooltipLegendConfig = computed(() => {
+    const { valueField, colors, name, unit } = active.value
+    const s = valueField ? stats.value[valueField] : null
+    if (!valueField || !s || s.min == null || s.max == null || !colors?.length) return null
+    const isPopulation = valueField === 'E_TOTPOP'
+    const isPercentile01 = valueField === 'EPL_OZONE' || valueField === 'EPL_PM'
+    const fmt = n => {
+        if (isPopulation) return Math.round(n).toLocaleString('en-US')
+        if (isPercentile01) return Math.round(n * 100)
+        return (Math.abs(n) % 1 === 0 ? n : +n.toFixed(1))
+    }
+    const displayUnit = name === 'Population' ? 'people' : (name === 'Social Vulnerability' ? 'index' : (isPercentile01 ? '%' : unit || ''))
+    return {
+        min: s.min,
+        max: s.max,
+        minLabel: fmt(s.min),
+        maxLabel: fmt(s.max),
+        palette: colors,
+        valueField,
+        factorName: name,
+        unit: displayUnit
+    }
+})
 
 const tooltipFields = computed(() => {
     const metric = active.value

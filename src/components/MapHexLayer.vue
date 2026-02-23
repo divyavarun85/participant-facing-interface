@@ -24,6 +24,7 @@ const props = defineProps({
   zoomOnClick: { type: Boolean, default: true },
   zoomOnClickTarget: { type: Number, default: 7.5 },
   tooltipFields: { type: Array, default: () => [] },
+  tooltipLegendConfig: { type: Object, default: null }, // { min, max, minLabel, maxLabel, palette, valueField } for mini legend
   tooltipFormatter: { type: Function, default: null },
   popupOptions: { type: Object, default: () => ({}) },
   selectedHexIds: { type: Array, default: () => [] },
@@ -148,6 +149,16 @@ function getTooltipHtml(feature) {
     const locationField = fields.find(f => f.label === 'Location')
     const dataFields = fields.filter(f => f.label !== 'Location')
 
+    const cfg = props.tooltipLegendConfig
+    const rawVal = cfg?.valueField != null ? Number(feature.properties?.[cfg.valueField]) : null
+    const hasLegend = cfg && cfg.min != null && cfg.max != null && cfg.palette?.length &&
+      rawVal != null && !Number.isNaN(rawVal) && cfg.max !== cfg.min
+
+    let pct = 0
+    if (hasLegend) {
+      pct = Math.min(100, Math.max(0, ((rawVal - cfg.min) / (cfg.max - cfg.min)) * 100))
+    }
+
     let html = `<style>
       .map-tooltip { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; min-width: 200px; max-width: 90vw; }
       .map-tooltip-header { font-weight: 600; font-size: 14px; color: #1f2937; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; }
@@ -155,6 +166,10 @@ function getTooltipHtml(feature) {
       .map-tooltip-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; }
       .map-tooltip-label { color: #64748b; font-weight: 900; }
       .map-tooltip-value { color: #1f2937; font-weight: 600; }
+      .map-tooltip-legend { margin-top: 10px; padding-top: 8px; border-top: 1px solid #e5e7eb; }
+      .map-tooltip-legend-bar { position: relative; height: 8px; border-radius: 4px; margin-bottom: 6px; }
+      .map-tooltip-legend-marker { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; border-radius: 50%; background: #1e293b; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2); pointer-events: none; }
+      .map-tooltip-legend-labels { display: flex; justify-content: space-between; font-size: 11px; color: #64748b; font-variant-numeric: tabular-nums; }
       @media (max-width: 480px) {
         .map-tooltip { min-width: 180px; max-width: 85vw; font-size: 12px; }
         .map-tooltip-header { font-size: 13px; }
@@ -175,6 +190,20 @@ function getTooltipHtml(feature) {
         html += `<div class="map-tooltip-row"><span class="map-tooltip-label">${label}:</span> <span class="map-tooltip-value">${value}</span></div>`
       })
       html += '</div>'
+    }
+
+    // Mini legend: full range with marker showing where value falls
+    if (hasLegend && cfg) {
+      const grad = cfg.palette.map(c => c).join(', ')
+      html += `<div class="map-tooltip-legend">
+        <div class="map-tooltip-legend-bar" style="background: linear-gradient(to right, ${grad});">
+          <div class="map-tooltip-legend-marker" style="left: ${pct}%;"></div>
+        </div>
+        <div class="map-tooltip-legend-labels">
+          <span>${cfg.minLabel}${cfg.unit ? ' ' + cfg.unit : ''}</span>
+          <span>${cfg.maxLabel}${cfg.unit ? ' ' + cfg.unit : ''}</span>
+        </div>
+      </div>`
     }
 
     html += '</div>'
