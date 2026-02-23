@@ -11,7 +11,20 @@
             </div>
             <div class="app-header__center">
                 <span class="app-header__title">Environmental Map</span>
-                <span class="app-header__badge">Prototype</span>
+                <div class="app-header__prototype-wrap">
+                    <span class="app-header__badge">Prototype</span>
+                    <button type="button" class="app-header__info-btn" aria-label="Prototype notice"
+                        @mouseenter="showPrototypeNotice = true" @mouseleave="showPrototypeNotice = false"
+                        @focus="showPrototypeNotice = true" @blur="showPrototypeNotice = false">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4M12 8h.01"></path>
+                        </svg>
+                    </button>
+                    <div v-show="showPrototypeNotice" class="app-header__prototype-tooltip" role="tooltip">
+                        This is a prototype using a limited CHEL 2022 dataset. Rankings are based on percentiles within this dataset only. Additional data could change classifications. This tool is not intended for decision-making purposes.
+                    </div>
+                </div>
             </div>
         </header>
         <div class="environmental-map-container">
@@ -78,6 +91,7 @@ const zipCache = new Map() // cache zip/address lookups
 const searchPinLocation = ref(null) // [lng, lat] for the searched location pin
 const selectedHexFeature = ref(null) // Feature data for the clicked hex
 const sidebarOpen = ref(false) // Mobile sidebar state
+const showPrototypeNotice = ref(false) // Tooltip for prototype info icon
 
 function isNumeric(v) { return typeof v === 'number' && Number.isFinite(v) }
 
@@ -660,6 +674,13 @@ async function handlePinSearch(queryInput) {
     color: #1e4f86;
 }
 
+.app-header__prototype-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .app-header__badge {
     font-size: 11px;
     font-weight: 600;
@@ -669,6 +690,49 @@ async function handlePinSearch(queryInput) {
     background: #e2e8f0;
     padding: 4px 8px;
     border-radius: 4px;
+}
+
+.app-header__info-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #64748b;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.app-header__info-btn:hover {
+    background: #cbd5e1;
+    color: #475569;
+}
+
+.app-header__prototype-tooltip {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: auto;
+    margin-top: 8px;
+    width: min(280px, calc(100vw - 32px));
+    max-width: 280px;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #334155;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    z-index: 100;
+    pointer-events: none;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: none;
 }
 
 .environmental-map-container {

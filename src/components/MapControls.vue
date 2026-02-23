@@ -396,7 +396,6 @@ function getFactorShortDescription(factorId) {
   margin-bottom: 2px;
 }
 
-
 .panel-heading {
   display: flex;
   justify-content: space-between;
