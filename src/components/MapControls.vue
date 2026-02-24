@@ -91,7 +91,7 @@
         </button>
         <button type="button" class="btn-how-to" @click="showHelp = true" :aria-expanded="showHelp">
           <span class="btn-how-to-icon">?</span>
-          How to use this app
+          How to use this tool
         </button>
       </div>
     </div>
@@ -102,7 +102,7 @@
       <div v-if="showHelp" class="help-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="help-modal-title" @click.self="showHelp = false">
         <div class="help-modal-dialog">
           <div class="help-modal-header">
-            <h2 id="help-modal-title" class="help-modal-title">How to Use This App</h2>
+            <h2 id="help-modal-title" class="help-modal-title">How to Use This Tool</h2>
             <button type="button" class="help-modal-close" @click="showHelp = false" aria-label="Close">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M18 6L6 18M6 6l12 12"/>
