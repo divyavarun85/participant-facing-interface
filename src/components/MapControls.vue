@@ -9,7 +9,8 @@
         </button>
       </div>
     </header>
-    <section class="panel card">
+    <div class="sidebar-scroll-area">
+    <section class="panel card find-location-card">
       <label class="field-label" for="pin-input">Find Your Location</label>
       <div class="pin-input-row">
         <div class="field-control ">
@@ -27,9 +28,8 @@
         </p>
       </transition>
     </section>
-    <div class="sidebar-scroll-area">
     <section class="panel card">
-      <label class="field-label">Environmental Factor</label>
+      <label class="field-label">Environmental Factors</label>
       <div class="variable-list" role="list">
         <div v-for="factor in factors" :key="factor.id" class="variable-item"
           :class="{ 'variable-item--selected': factor.id === selectedFactor }"
@@ -39,15 +39,12 @@
           @click="$emit('factor-change', factor.id)"
           @keydown.enter.prevent="$emit('factor-change', factor.id)"
           @keydown.space.prevent="$emit('factor-change', factor.id)">
-          <div class="variable-preview">
-            <span v-for="(color, idx) in factor.colorScale" :key="idx" class="variable-preview-swatch"
-              :style="{ backgroundColor: color }"></span>
-          </div>
           <div class="variable-details">
             <div class="variable-header">
               <span class="variable-name">{{ factor.name }}</span>
-              <span class="variable-unit" v-if="factor.unit">{{ factor.unit }}</span>
+              <span v-if="factor.valueField" class="variable-badge">{{ factor.valueField }}</span>
             </div>
+            <span v-if="factor.unit" class="variable-unit">{{ factor.unit }}</span>
             <p class="variable-description">{{ getFactorShortDescription(factor.id) }}</p>
             <a v-if="getLearnMoreUrl(factor.id)" class="learn-more-link" :href="getLearnMoreUrl(factor.id)"
               target="_blank" rel="noopener noreferrer" @click.stop>
@@ -91,17 +88,28 @@
           Download Data
         </button>
         <button type="button" class="btn-how-to" @click="showHelp = !showHelp" :aria-expanded="showHelp">
+          <span class="btn-how-to-icon">?</span>
           How to use this app
         </button>
       </div>
       <transition name="collapse">
         <section v-if="showHelp" class="help-panel card card-muted">
-          <h3>Quick Tips</h3>
-          <ul>
-            <li>Enter a ZIP code or address to zoom directly to that area.</li>
-            <li>Click an environmental factor below to swap between indicators on the map.</li>
-            <li>Select a factor to see how the map colors correspond to value ranges.</li>
-          </ul>
+          <div class="help-panel-header">
+            <h3>How to Use This App</h3>
+            <button type="button" class="help-panel-close" @click="showHelp = false" aria-label="Close help">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+          <ol class="help-workflow">
+            <li><strong>Find a location:</strong> Enter a ZIP code or address and click "Locate" to zoom to that area on the map.</li>
+            <li><strong>Select an environmental factor:</strong> Click an environmental factor (e.g., Air Pollution, Ozone, Asthma Rates) below to change which indicator is displayed on the map.</li>
+            <li><strong>Read the legend:</strong> The legend shows how map colors correspond to value ranges. Darker colors indicate higher values; lighter colors indicate lower values.</li>
+            <li><strong>Hover over hexagons:</strong> Hover over any hexagon to see a tooltip with the value for that area and where it falls on the scale.</li>
+            <li><strong>Click a hexagon:</strong> Click a hexagon to open a sidebar with detailed data for that area across all factors.</li>
+            <li><strong>Download data:</strong> Click "Download Data" below to export the full dataset as a CSV file.</li>
+          </ol>
         </section>
       </transition>
     </div>
@@ -233,13 +241,13 @@ function getFactorShortDescription(factorId) {
 .map-controls {
   position: relative;
   z-index: 10;
-  width: 340px;
+  width: 380px;
   min-height: 0;
   flex-shrink: 0;
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
   overflow: hidden;
-  padding: 28px 24px;
+  padding: 28px 20px;
   box-shadow: inset -1px 0 0 rgba(17, 24, 39, 0.05);
   display: flex;
   flex-direction: column;
@@ -249,16 +257,19 @@ function getFactorShortDescription(factorId) {
 .sidebar-scroll-area {
   flex: 1;
   min-height: 0;
+  min-width: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding-right: 14px;
+  box-sizing: border-box;
 }
 
 .sidebar-footer {
   flex-shrink: 0;
   padding-top: 12px;
-  border-top: 1px solid #e2e8f0;
   margin-top: auto;
   display: flex;
   flex-direction: column;
@@ -267,8 +278,8 @@ function getFactorShortDescription(factorId) {
 
 .sidebar-footer-buttons {
   display: flex;
+  flex-direction: column;
   gap: 10px;
-  align-items: stretch;
 }
 
 .btn-download {
@@ -276,7 +287,7 @@ function getFactorShortDescription(factorId) {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  flex: 1;
+  width: 100%;
   padding: 10px 16px;
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
   color: #fff;
@@ -294,32 +305,96 @@ function getFactorShortDescription(factorId) {
 }
 
 .btn-how-to {
-  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
   padding: 10px 16px;
-  background: #f8fafc;
+  background: #fff;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
   color: #475569;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .btn-how-to:hover {
-  background: #e2e8f0;
+  background: #f8fafc;
   border-color: #94a3b8;
+  color: #334155;
+}
+
+.btn-how-to-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #64748b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .help-panel {
   padding: 14px 16px;
 }
 
+.help-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
 .help-panel h3 {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 14px;
   font-weight: 600;
   color: #1f2937;
+}
+
+.help-panel-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.help-panel-close:hover {
+  background: #e2e8f0;
+  color: #1f2937;
+}
+
+.help-workflow {
+  margin: 0;
+  padding-left: 20px;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.help-workflow li {
+  margin-bottom: 8px;
+}
+
+.help-workflow li:last-child {
+  margin-bottom: 0;
 }
 
 .panel-header {
@@ -393,11 +468,19 @@ function getFactorShortDescription(factorId) {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 14px 16px 16px;
+  padding: 12px 14px 14px;
   box-shadow: 0 1px 2px rgba(148, 163, 184, 0.12);
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.find-location-card {
+  width: 100%;
+  min-width: 0;
 }
 
 .card-muted {
@@ -438,34 +521,37 @@ function getFactorShortDescription(factorId) {
 .variable-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .variable-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding: 8px 10px;
-  background: #fff;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
+  box-sizing: border-box;
 }
 
 .variable-item:hover {
-  border-color: #cbd5f5;
-  background: #f8fafc;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-color: #cbd5e1;
+  background: #f1f5f9;
 }
 
 .variable-item--selected {
   border-color: #2563eb;
-  background: #eef2ff;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: #eff6ff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
 }
 
 .variable-preview {
@@ -496,15 +582,31 @@ function getFactorShortDescription(factorId) {
 
 .variable-header {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.variable-badge {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 6px;
 }
 
 .variable-description {
-  font-size: 11px;
-  color: #64748b;
-  margin: 0;
-  line-height: 1.35;
+  font-size: 12px;
+  color: #475569;
+  margin: 4px 0 0 0;
+  line-height: 1.45;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .learn-more-link {
@@ -550,9 +652,12 @@ function getFactorShortDescription(factorId) {
 
 
 .variable-name {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #1f2937;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .variable-item--selected .variable-name {
@@ -562,6 +667,7 @@ function getFactorShortDescription(factorId) {
 .variable-unit {
   font-size: 12px;
   color: #64748b;
+  margin-top: 2px;
 }
 
 .variable-checkmark {
@@ -652,6 +758,7 @@ function getFactorShortDescription(factorId) {
 
 .legend-bar-wrap {
   margin-top: 12px;
+  min-width: 0;
 }
 
 .legend-bar-title {
@@ -700,6 +807,8 @@ function getFactorShortDescription(factorId) {
   flex: 1;
   min-width: 0;
   text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .legend-bar-range--nodata {
@@ -753,7 +862,7 @@ function getFactorShortDescription(factorId) {
 
 .pin-input-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) 82px;
   gap: 10px;
   align-items: stretch;
 }
@@ -978,16 +1087,28 @@ function getFactorShortDescription(factorId) {
 
 .pin-input-row {
   display: flex;
-  gap: 38px;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pin-input-row .field-control {
+  min-width: 0;
+  flex: 1;
+}
+
+.pin-input-row .btn-primary {
+  flex-shrink: 0;
 }
 
 .pin-input-row input {
-  flex: 1;
+  width: 100%;
+  min-width: 0;
   padding: 10px 12px;
   border: 1px solid #cbd5f0;
   border-radius: 8px;
   font-size: 14px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
 }
 
 .pin-input-row input:focus {
@@ -1222,7 +1343,7 @@ function getFactorShortDescription(factorId) {
   .map-controls {
     position: relative !important;
     transform: none !important;
-    width: 340px;
+    width: 380px;
     flex-shrink: 0;
   }
 

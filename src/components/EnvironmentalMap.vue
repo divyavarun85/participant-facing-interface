@@ -16,14 +16,15 @@
                 </div>
             </div>
             <div class="app-header__right">
-                <div class="app-header__prototype-wrap">
-                    <span class="app-header__badge">PROTOTYPE</span>
-                    <button type="button" class="app-header__info-btn" aria-label="Prototype notice"
-                        @mouseenter="showPrototypeNotice = true" @mouseleave="showPrototypeNotice = false"
+                <div class="app-header__prototype-wrap"
+                    @mouseenter="showPrototypeNotice = true" @mouseleave="showPrototypeNotice = false">
+                    <button type="button" class="app-header__info-tag" aria-label="Prototype notice"
                         @focus="showPrototypeNotice = true" @blur="showPrototypeNotice = false">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+                        <span class="app-header__info-tag-dot" aria-hidden="true"></span>
+                        <span class="app-header__info-tag-text">PROTOTYPE</span>
+                        <svg class="app-header__info-tag-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4M12 8h.01"></path>
                         </svg>
                     </button>
                     <div v-show="showPrototypeNotice" class="app-header__prototype-tooltip" role="tooltip">
@@ -696,40 +697,42 @@ async function handlePinSearch(queryInput) {
 
 .app-header__prototype-wrap {
     position: relative;
-    display: flex;
-    align-items: center;
-    gap: 6px;
 }
 
-.app-header__badge {
+.app-header__info-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.04em;
-    color: #1e4f86;
-    background: #dbeafe;
-    border: 1.5px solid #3b82f6;
-    padding: 6px 12px;
-    border-radius: 8px;
+    cursor: default;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
 
-.app-header__info-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: #475569;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-}
-
-.app-header__info-btn:hover {
+.app-header__info-tag:hover,
+.app-header__prototype-wrap:focus-within .app-header__info-tag {
+    border-color: #94a3b8;
     background: #e2e8f0;
-    color: #1e4f86;
+    color: #334155;
+}
+
+.app-header__info-tag-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #475569;
+    flex-shrink: 0;
+}
+
+.app-header__info-tag-icon {
+    flex-shrink: 0;
+    color: #64748b;
 }
 
 .app-header__prototype-tooltip {
