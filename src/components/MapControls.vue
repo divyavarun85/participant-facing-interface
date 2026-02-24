@@ -20,6 +20,9 @@
           <span v-if="pinLoading" class="spinner" aria-hidden="true"></span>
           <span>{{ pinLoading ? 'Searching…' : 'Locate' }}</span>
         </button>
+        <button type="button" class="btn-clear" @click="clearPin" :disabled="pinLoading" aria-label="Clear location">
+          Clear
+        </button>
       </div>
       <transition name="fade">
         <p v-if="pinErrorToDisplay" class="feedback feedback-error" role="alert">
@@ -42,7 +45,6 @@
           <div class="variable-details">
             <div class="variable-header">
               <span class="variable-name">{{ factor.name }}</span>
-              <span v-if="factor.valueField" class="variable-badge">{{ factor.valueField }}</span>
             </div>
             <span v-if="factor.unit" class="variable-unit">{{ factor.unit }}</span>
             <p class="variable-description">{{ getFactorShortDescription(factor.id) }}</p>
@@ -131,7 +133,7 @@ const props = defineProps({
   pinErrorMessage: { type: String, default: '' },
   pinLoading: { type: Boolean, default: false }
 })
-const emit = defineEmits(['factor-change', 'legend-bin-click', 'toggle-overlay', 'pin-search', 'close-sidebar', 'download'])
+const emit = defineEmits(['factor-change', 'legend-bin-click', 'toggle-overlay', 'pin-search', 'clear-pin', 'close-sidebar', 'download'])
 
 const showHelp = ref(false)
 const showLegendTooltip = ref(false)
@@ -214,6 +216,12 @@ function submitPin() {
   }
   pinErrorLocal.value = ''
   emit('pin-search', query)
+}
+
+function clearPin() {
+  pinQuery.value = ''
+  pinErrorLocal.value = ''
+  emit('clear-pin')
 }
 function getLearnMoreUrl(factorId) {
   const urls = {
@@ -589,17 +597,6 @@ function getFactorShortDescription(factorId) {
   min-width: 0;
 }
 
-.variable-badge {
-  flex-shrink: 0;
-  padding: 3px 8px;
-  background: #dbeafe;
-  color: #1d4ed8;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  border-radius: 6px;
-}
-
 .variable-description {
   font-size: 12px;
   color: #475569;
@@ -862,7 +859,7 @@ function getFactorShortDescription(factorId) {
 
 .pin-input-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 82px;
+  grid-template-columns: minmax(0, 1fr) 82px 56px;
   gap: 10px;
   align-items: stretch;
 }
@@ -891,6 +888,32 @@ function getFactorShortDescription(factorId) {
 .btn-primary:not(:disabled):hover {
   box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
   transform: translateY(-1px);
+}
+
+.btn-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.btn-clear:hover:not(:disabled) {
+  border-color: #94a3b8;
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.btn-clear:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btn-primary .spinner {
@@ -1096,7 +1119,8 @@ function getFactorShortDescription(factorId) {
   flex: 1;
 }
 
-.pin-input-row .btn-primary {
+.pin-input-row .btn-primary,
+.pin-input-row .btn-clear {
   flex-shrink: 0;
 }
 
@@ -1397,6 +1421,11 @@ function getFactorShortDescription(factorId) {
   }
 
   .pin-input-row input {
+    width: 100%;
+  }
+
+  .pin-input-row .btn-primary,
+  .pin-input-row .btn-clear {
     width: 100%;
   }
 

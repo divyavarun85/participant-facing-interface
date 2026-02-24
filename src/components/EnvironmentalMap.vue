@@ -35,7 +35,7 @@
             <MapControls :class="{ 'sidebar-open': sidebarOpen }" :factors="factors" :selected-factor="selectedFactor"
                 :legend-bins="legendBins" :palette="active.colors" :unit="active.unit" :active-factor-name="active.name"
                 :pin-error-message="pinErrorMessage" :pin-loading="pinLoading" @factor-change="onFactorChange"
-                @toggle-overlay="overlayOn = $event" @pin-search="handlePinSearch"
+                @toggle-overlay="overlayOn = $event" @pin-search="handlePinSearch" @clear-pin="handleClearPin"
                 @close-sidebar="sidebarOpen = false" @download="handleDownload" />
             <div class="map-wrapper">
                 <MapHexLayer v-if="dataObj" :data="dataObj" :style="style" :mapStyle="mapStyle"
@@ -608,6 +608,11 @@ async function handlePinSearch(queryInput) {
     } finally {
         pinLoading.value = false
     }
+}
+
+function handleClearPin() {
+    searchPinLocation.value = null
+    pinErrorMessage.value = ''
 }
 </script>
 
